@@ -1,5 +1,4 @@
 #### Wrangling LICOR600 data for T cacao ####
-source("source/read-licor600-files.R")
 library(tidyverse)
 library(patchwork)
 library(cowplot)
@@ -10,7 +9,8 @@ set.seed(323)
 
 #### Reading ####
 
-all_measurments <- read_csv("data/all_licor600.csv")
+all_measurements <- read_csv("data/all_licor600.csv")
+# Works better if you just run the wrangle-concatenate script
 
 # Going to use the default LICOR config for reproducability
 
@@ -23,26 +23,26 @@ smaller_measurements <- all_measurements |>
 
 sum_small_data <- smaller_measurements |> 
   group_by(individual, canopy, period, Date) |> 
-  summarize(gsw_m = mean(gsw),
-            gsw_sd = sd(gsw),
-            gbw_m = mean(gbw),
-            gtw = mean(gtw),
-            E_apparent_m = mean(E_apparent),
-            VPcham_m = mean(VPcham),
-            VPref_m = mean(VPref),
-            VPleaf_m = mean(VPleaf),
-            VPDleaf_m = mean(VPDleaf),
-            Fs_m = mean(Fs),
-            `Fm'_m` = mean(`Fm'`),
-            `Fm'_sd` = sd(`Fm'`),
-            rh_s_m = mean(rh_s),
-            rh_r_m = mean(rh_r),
-            Tleaf_m = mean(Tleaf)) |> 
+  summarize(gsw_m = mean(gsw, na.rm = TRUE),
+            gsw_sd = sd(gsw, na.rm = TRUE),
+            gbw_m = mean(gbw, na.rm = TRUE),
+            gtw = mean(gtw, na.rm = TRUE),
+            E_apparent_m = mean(E_apparent, na.rm = TRUE),
+            VPcham_m = mean(VPcham, na.rm = TRUE),
+            VPref_m = mean(VPref, na.rm = TRUE),
+            VPleaf_m = mean(VPleaf, na.rm = TRUE),
+            VPDleaf_m = mean(VPDleaf, na.rm = TRUE),
+            Fs_m = mean(Fs, na.rm = TRUE),
+            `Fm'_m` = mean(`Fm'`, na.rm = TRUE),
+            `Fm'_sd` = sd(`Fm'`, na.rm = TRUE),
+            rh_s_m = mean(rh_s, na.rm = TRUE),
+            rh_r_m = mean(rh_r, na.rm = TRUE),
+            Tleaf_m = mean(Tleaf, na.rm = TRUE)) |> 
   ungroup() |> 
   mutate(time = case_when(period == "early" ~ hms::as_hms("6:00:00"),
                           period == "morning" ~ hms::as_hms("8:00:00"),
                           period == "noon" ~ hms::as_hms("12:00:00"),
-                          period == "afternoon" ~ hms::as_hms("15:30:00")),
+                          period == "afternoon" ~ hms::as_hms("16:30:00")),
          dt = as.POSIXct(paste(Date, time))) |> 
   relocate(dt, Date, time)
 

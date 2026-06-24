@@ -7,7 +7,6 @@ all_600_files <- list.files("data/licor600_data/")
 # Initialize dataframe
 all_measurements <- data.frame(Date = NA, Time = NA)
 
-
 for (i in 1:length(all_600_files)) {
   # Read in each file, delete extra headers
   hold <- read_csv(paste0("data/licor600_data/", all_600_files[i]))
@@ -33,17 +32,18 @@ for (i in 1:length(all_600_files)) {
            Time = hms::as_hms(Time))
   
   # File got weird for this one and recorded the time wrong
-  if (all_600_files[i] == "2026-06-23-early.csv") {
+  if (all_600_files[i] == "2026-06-23_early.csv") {
     hold_clean <- hold_clean |> 
-      mutate(Time = Time - (3 * 3600),
+      mutate(Time = Time - (3 * 3600 + 600),
              Time = hms::as_hms(Time))
   }
   
-  # I suck and messed up the order on this one
-  if (all_600_files[i] == "2026-06-22_morning.csv") {
+  # I suck and messed up the order on these ones
+  if (all_600_files[i] == "2026-06-22_morning.csv" | all_600_files[i] == "2026-06-23_morning.csv" | all_600_files[i] == "2026-06-23_early.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(2, 6), rep(2, 6), rep(1, 6), rep(3, 12), rep(4, 12)),
-             canopy = c(rep("lower", 12), rep("upper", 12), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)))
+             canopy = c(rep("lower", 12), rep("upper", 12), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
+             dark = as.character(dark))
   }
   
   # Finish cleaning up raw files (make dt, label periods)
