@@ -42,7 +42,7 @@ sum_small_data <- smaller_measurements |>
   mutate(time = case_when(period == "early" ~ hms::as_hms("6:00:00"),
                           period == "morning" ~ hms::as_hms("8:00:00"),
                           period == "noon" ~ hms::as_hms("12:00:00"),
-                          period == "afternoon" ~ hms::as_hms("16:30:00")),
+                          period == "afternoon" ~ hms::as_hms("18:30:00")),
          dt = as.POSIXct(paste(Date, time))) |> 
   relocate(dt, Date, time)
 
@@ -51,6 +51,7 @@ sum_small_data <- smaller_measurements |>
 # Stomatal conductance
 gs_raw_points <- sum_small_data |> 
   ggplot(aes(x = dt, y = gsw_m, color = factor(individual), shape = canopy)) +
+  # geom_line(aes(x = dt, y = gsw_m, group = interaction(individual, Date, canopy), color = factor(individual)), alpha = 0.5, position = position_dodge(width = 5000)) +
   geom_errorbar(aes(ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), position = position_dodge(width = 5000), width = 10000) +
   geom_point(position = position_dodge(width = 5000), size = 3) +
   scale_color_brewer(palette = "Dark2") +
@@ -59,10 +60,11 @@ gs_raw_points <- sum_small_data |>
        color = "Individual",
        shape = "Canopy level") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10),
-        legend.title = element_text(size = 12),
-        legend.text = element_text(size = 10))
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13)) + NULL
+  # facet_wrap(~ Date, scales = "free")
 
 gs_by_period <- sum_small_data |> 
   ggplot(aes(x = factor(period, levels = c("early", "morning", "noon", "afternoon")), y = gsw_m, group = interaction(factor(period), canopy), color = canopy)) +
@@ -71,12 +73,11 @@ gs_by_period <- sum_small_data |>
   scale_color_brewer(palette = "Set1") +
   labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")),
        x = "Period",
-       color = "Canopy level",) +
+       color = "Canopy level") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10),
-        legend.title = element_text(size = 12),
-        legend.text = element_text(size = 10))
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.position = "none")
 
 gs_by_canopy <- sum_small_data |> 
   ggplot(aes(x = canopy, y = gsw_m, color = canopy)) +
@@ -84,23 +85,26 @@ gs_by_canopy <- sum_small_data |>
   geom_jitter(width = 0.15, size = 2, alpha = 0.3) +
   scale_color_brewer(palette = "Set1") +
   labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")),
-       x = "Canopy level") +
+       x = "Canopy level",
+       color = "Canopy level") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10),
-        legend.position = "none")
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13))
 
 # gs_raw_points / gs_by_tree + gs_by_canopy
 
-left_gs <- plot_grid(gs_raw_points, gs_by_period,
-                     nrow = 2)
-right_gs <- plot_grid(gs_by_canopy,
+top_gs <- plot_grid(gs_raw_points,
+                     nrow = 1)
+bottom_gs <- plot_grid(gs_by_period, gs_by_canopy,
                       nrow = 1)
-plot_grid(left_gs, right_gs, nrow = 1)
+plot_grid(top_gs, bottom_gs, nrow = 2)
 
 # Fluorescence
 fm_raw_points <- sum_small_data |> 
   ggplot(aes(x = dt, y = `Fm'_m`, color = factor(individual), shape = canopy)) +
+  # geom_line(aes(x = dt, y = `Fm'_m`, group = interaction(individual, Date, canopy), color = factor(individual)), alpha = 0.5, position = position_dodge(width = 5000)) +
   geom_errorbar(aes(ymin = `Fm'_m` - `Fm'_sd`, ymax = `Fm'_m` + `Fm'_sd`), position = position_dodge(width = 5000), width = 10000) +
   geom_point(position = position_dodge(width = 5000), size = 3) +
   scale_color_brewer(palette = "Dark2") +
@@ -109,10 +113,11 @@ fm_raw_points <- sum_small_data |>
        color = "Individual",
        shape = "Canopy level") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10),
-        legend.title = element_text(size = 12),
-        legend.text = element_text(size = 10))
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13)) + NULL
+  # facet_wrap(~ Date, scales = "free")
 
 fm_by_period <- sum_small_data |> 
   ggplot(aes(x = factor(period, levels = c("early", "morning", "noon", "afternoon")), y = `Fm'_m`, group = interaction(factor(period), canopy), color = canopy)) +
@@ -120,13 +125,11 @@ fm_by_period <- sum_small_data |>
   geom_jitter(width = 0.15, size = 2, alpha = 0.3) +
   scale_color_brewer(palette = "Set1") +
   labs(y = "Maximum fluorescence in light",
-       x = "Period",
-       color = "Canopy level",) +
+       x = "Period") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10),
-        legend.title = element_text(size = 12),
-        legend.text = element_text(size = 10))
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.position = "none")
 
 fm_by_canopy <- sum_small_data |> 
   ggplot(aes(x = canopy, y = `Fm'_m`, color = canopy)) +
@@ -134,17 +137,37 @@ fm_by_canopy <- sum_small_data |>
   geom_jitter(width = 0.15, size = 2, alpha = 0.3) +
   scale_color_brewer(palette = "Set1") +
   labs(y = "Maximum fluorescence in light",
-       x = "Canopy level") +
+       x = "Canopy level",
+       color = "Canopy level") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10),
-        legend.position = "none")
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13))
 
-left_fm <- plot_grid(fm_raw_points, fm_by_period,
-                     nrow = 2)
-right_fm <- plot_grid(fm_by_canopy,
+top_fm <- plot_grid(fm_raw_points,
+                     nrow = 1)
+bottom_fm <- plot_grid(fm_by_period, fm_by_canopy,
                       nrow = 1)
-plot_grid(left_fm, right_fm, nrow = 1)
+plot_grid(top_fm, bottom_fm, nrow = 2)
+
+
+no_canopy <- sum_small_data |> 
+  group_by(Date, dt, time, individual, period) |> 
+  summarize(gsw.m = mean(gsw_m),
+            gsw.sd = sd(gsw_m)) |> 
+  ungroup()
+
+temp <- smaller_measurements |> 
+  ggplot(aes(x = dt)) +
+  geom_point(aes(y = gsw, color = factor(individual), shape = canopy), size = 2.5, alpha = 0.5) +
+  scale_color_brewer(palette = "Dark2") +
+  geom_errorbar(data = no_canopy, aes(x = dt, ymin = gsw.m - gsw.sd, ymax = gsw.m + gsw.sd, group = interaction(individual, Date), color = factor(individual)), width = 2200, alpha = 0.7) +
+  geom_line(data = no_canopy, aes(x = dt, y = gsw.m, group = interaction(individual, Date), color = factor(individual))) +
+  theme(panel.grid = element_blank())
+
+
+gs_raw_points / temp
 
 
 
