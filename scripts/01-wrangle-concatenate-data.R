@@ -39,7 +39,7 @@ for (i in 1:length(all_600_files)) {
   }
   
   # I suck and messed up the order on these ones
-  if (all_600_files[i] == "2026-06-22_morning.csv" | all_600_files[i] == "2026-06-23_morning.csv" | all_600_files[i] == "2026-06-23_early.csv") {
+  if (all_600_files[i] == "2026-06-22_morning.csv" | all_600_files[i] == "2026-06-23_morning.csv" | all_600_files[i] == "2026-06-29_early.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(2, 6), rep(2, 6), rep(1, 6), rep(3, 12), rep(4, 12)),
              canopy = c(rep("lower", 12), rep("upper", 12), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
@@ -55,7 +55,7 @@ for (i in 1:length(all_600_files)) {
   }
   
   # Also messed up the order but had a good reason for it (predawn)
-  if (all_600_files[i] == "2026-06-25_early.csv") {
+  if (all_600_files[i] == "2026-06-25_early.csv" | all_600_files[i] == "2026-06-25_morning.csv" | all_600_files[i] == "2026-06-25_midday.csv" | all_600_files[i] == "2026-06-29_early.csv" | all_600_files[i] == "2026-06-29_morning.csv" | all_600_files[i] == "2026-06-30_early.csv" | all_600_files[i] == "2026-06-30_morning.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(1, 6), rep(2, 6), rep(2, 6), rep(3, 6), rep(3, 6), rep(4, 6), rep(4, 6)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
@@ -67,7 +67,7 @@ for (i in 1:length(all_600_files)) {
     mutate(dt = as.POSIXct(paste(Date, Time)),
            period = case_when(Time >= hms::as_hms("4:00:00") & Time < hms::as_hms("7:00:00") ~ "early",
                               Time >= hms::as_hms("7:00:00") & Time < hms::as_hms("10:00:00") ~ "morning",
-                              Time >= hms::as_hms("10:00:00") & Time < hms::as_hms("14:00:00") ~ "noon",
+                              Time >= hms::as_hms("10:00:00") & Time < hms::as_hms("14:00:00") ~ "midday",
                               Time >= hms::as_hms("14:00:00") ~ "afternoon"),
            month = as.numeric(substr(Date, 6, 7)),
            day = as.numeric(substr(Date, 9, 10)),

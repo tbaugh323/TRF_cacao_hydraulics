@@ -13,11 +13,16 @@ wp <- read_sheet("https://docs.google.com/spreadsheets/d/1LdmUZRiTcnKyBLbcdbUDEp
   mutate(time = hms::as_hms(time),
          date = as.Date(date),
          dt = as.POSIXct(paste(date, time))) |> 
+  mutate(canopy = case_when(canopy == "lower" ~ "Lower canopy",
+                            canopy == "upper" ~ "Upper canopy")) |> 
   relocate(dt)
+
+# Writing out to have locally
+write_csv(wp, "data/all_wp.csv")
 
 # Summarizing
 wp_sum <- wp |> 
-  group_by(individual, canopy, date) |> 
+  group_by(individual, canopy, date, period) |> 
   summarize(wp_m = mean(wp),
             wp_sd = sd(wp),
             n = n()) |> 
@@ -40,15 +45,16 @@ wp |>
         legend.text = element_text(size = 13))
 
 wp_sum |> 
-  ggplot(aes(x = date, color = factor(individual), shape = canopy)) +
-  geom_jitter(data = wp, aes(x = date, y = wp, color = factor(individual), shape = canopy), position = position_dodge(width = 0.35), alpha = 0.5, size = 3) +
+  ggplot(aes(x = date, color = factor(individual), shape = period)) +
+  geom_jitter(data = wp, aes(x = date, y = wp, color = factor(individual), shape = period), position = position_dodge(width = 0.35), alpha = 0.5, size = 3) +
   geom_errorbar(aes(ymin = wp_m - wp_sd, ymax = wp_m + wp_sd), position = position_dodge(width = 0.35), width = 0.2) +
   geom_point(aes(y = wp_m), position = position_dodge(width = 0.35), size = 4) +
   scale_color_brewer(palette = "Dark2") +
+  facet_wrap(~ canopy) +
   labs(x = "Date",
        y = expression(paste(Psi[PD], " (MPa)")),
        color = "Individual",
-       shape = "Canopy") +
+       shape = "Period") +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),
         axis.text = element_text(size = 13),
