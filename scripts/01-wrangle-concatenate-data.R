@@ -54,10 +54,33 @@ for (i in 1:length(all_600_files)) {
              dark = as.character(dark))
   }
   
-  # Also messed up the order but had a good reason for it (predawn)
-  if (all_600_files[i] == "2026-06-25_early.csv" | all_600_files[i] == "2026-06-25_morning.csv" | all_600_files[i] == "2026-06-25_midday.csv" | all_600_files[i] == "2026-06-29_early.csv" | all_600_files[i] == "2026-06-29_morning.csv" | all_600_files[i] == "2026-06-30_early.csv" | all_600_files[i] == "2026-06-30_morning.csv") {
+  # Also messed up the order
+  if (all_600_files[i] == "2026-06-25_early.csv" |
+      all_600_files[i] == "2026-06-25_morning.csv" |
+      all_600_files[i] == "2026-06-25_midday.csv" |
+      all_600_files[i] == "2026-06-29_early.csv" |
+      all_600_files[i] == "2026-06-29_morning.csv" |
+      all_600_files[i] == "2026-06-30_early.csv" |
+      all_600_files[i] == "2026-06-30_morning.csv" |
+      all_600_files[i] == "2026-06-30_midday.csv" |
+      all_600_files[i] == "2026-07-01_early.csv" |
+      all_600_files[i] == "2026-07-02_early.csv" |
+      all_600_files[i] == "2026-07-02_morning.csv" |
+      all_600_files[i] == "2026-07-02_midday.csv" |
+      all_600_files[i] == "2026-07-03_early.csv" |
+      all_600_files[i] == "2026-07-03_morning.csv" |
+      all_600_files[i] == "2026-07-03_midday.csv" |
+      all_600_files[i] == "2026-07-07_early.csv" |
+      all_600_files[i] == "2026-07-07_morning.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(1, 6), rep(2, 6), rep(2, 6), rep(3, 6), rep(3, 6), rep(4, 6), rep(4, 6)),
+             canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
+             dark = as.character(dark))
+  }
+  
+  if (all_600_files[i] == "2026-07-01_morning.csv") {
+    hold_clean <- hold_clean |> 
+      mutate(individual = c(rep(1, 6), rep(1, 6), rep(3, 6), rep(3, 6), rep(2, 6), rep(2, 6), rep(4, 6), rep(4, 6)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
              dark = as.character(dark))
   }
@@ -71,10 +94,9 @@ for (i in 1:length(all_600_files)) {
                               Time >= hms::as_hms("14:00:00") ~ "afternoon"),
            month = as.numeric(substr(Date, 6, 7)),
            day = as.numeric(substr(Date, 9, 10)),
-           condition = case_when(month == 06 & day <= 27 ~ "predrought",
-                                 month == 06 & day > 27 ~ "drought",
-                                 month == 07 & day <= 11 ~ "drought",
-                                 month == 07 & day > 11 ~ "recovery")) |> 
+           condition = case_when(month == 06 ~ "predrought",
+                                 month == 07 & day <= 15 ~ "drought",
+                                 month == 07 & day > 15 ~ "recovery")) |> 
     relocate(dt, individual, canopy, period, condition) |> 
     mutate(across(c(Observation:leaf_width, Fo:batt, rh_adj:Ble, flash_intensity:z_flr), as.numeric))
   

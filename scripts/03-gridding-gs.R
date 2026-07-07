@@ -1,0 +1,113 @@
+#### Plotting and exploring LI-600 stomatal conductance data ####
+library(tidyverse)
+library(patchwork)
+library(cowplot)
+library(RColorBrewer)
+library(openintro)
+theme_set(theme_bw())
+set.seed(323)
+
+#### Visualizing ####
+
+# Looking at most recent data
+sum_by_individual |> 
+  filter(Date == as.Date("2026-07-07")) |>
+  ggplot(aes(color = factor(individual))) +
+  geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), width = 1000) +
+  geom_point(aes(x = dt, y = gsw_m, shape = canopy), size = 3) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")),
+       x = "Date time",
+       color = "Individual",
+       shape = "Canopy level") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13)) +
+  facet_wrap(~ individual, ncol = 1)
+
+# Grid plots
+gs_raw_points <- sum_by_canopy |> 
+  filter(gsw_var == "gsw_raw_m") |> 
+  ggplot() +
+  geom_vline(data = rain_df, aes(xintercept = dt), linetype = 2, linewidth = 1, color = "royalblue4") +
+  # geom_line(aes(x = dt, y = gsw_m, group = interaction(individual, Date, canopy), color = factor(individual)), alpha = 0.5, position = position_dodge(width = 5000)) +
+  geom_errorbar(aes(x = dt, color = canopy, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), position = position_dodge(width = 5000), width = 10000) +
+  geom_point(aes(x = dt, y = gsw_m, color = canopy, shape = canopy), position = position_dodge(width = 5000), size = 3) +
+  scale_color_manual(values = c("skyblue2", "tomato")) +
+  labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")),
+       x = "Date time",
+       color = "Individual",
+       shape = "Canopy level") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13))
+  # facet_wrap(~ Date, scales = "free")
+
+gs_by_period <- sum_by_canopy |> 
+  filter(gsw_var == "gsw_raw_m") |> 
+  ggplot(aes(x = factor(period, levels = c("early", "morning", "midday", "afternoon")), y = gsw_m, group = interaction(factor(period), canopy), color = canopy)) +
+  geom_boxplot() +
+  # geom_jitter(width = 0.15, size = 2, alpha = 0.3) +
+  scale_color_manual(values = c("skyblue2", "tomato")) +
+  labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")),
+       x = "Period",
+       color = "Canopy level") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.position = "none")
+
+gs_by_canopy <- sum_by_canopy |> 
+  filter(gsw_var == "gsw_raw_m") |> 
+  mutate(condition = factor(condition, levels = c("predrought", "drought", "recovery"))) |> 
+  ggplot(aes(x = condition, y = gsw_m, color = canopy)) +
+  geom_boxplot() +
+  # geom_jitter(width = 0.15, size = 2, alpha = 0.3) +
+  scale_color_manual(values = c("skyblue2", "tomato")) +
+  labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")),
+       x = "Drought Condition",
+       color = "Canopy level") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.title.y = element_blank(),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13))
+
+# gs_raw_points / gs_by_tree + gs_by_canopy
+
+top_gs <- plot_grid(gs_raw_points,
+                     nrow = 1)
+bottom_gs <- plot_grid(gs_by_period, gs_by_canopy,
+                      nrow = 1)
+plot_grid(top_gs, bottom_gs, nrow = 2)
+
+
+
+
+
+#### Testing ####
+
+# Assessing normality of gs
+qqnormsim(gsw, clean_all_data)
+
+gs_sum <- clean_all_data |> 
+  group_by(canopy) |> 
+  summarize(gsw_m = mean(gsw)) |> 
+  ungroup()
+t.test(gs_sum$gsw_m, mu = 0)
+
+# Assessing normality of Fm'
+qqnormsim(`Fm'`, clean_all_data)
+
+fm_sum <- clean_all_data |> 
+  group_by(canopy) |> 
+  summarize(fm_m = mean(`Fm'`)) |> 
+  ungroup()
+t.test(fm_sum$fm_m, mu = 0)
+
+

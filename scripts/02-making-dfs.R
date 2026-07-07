@@ -16,11 +16,18 @@ clean_all_data <- all_measurements |>
   mutate(canopy = ifelse(canopy == "lower", "Lower", "Upper"),
          individual = as.character(individual))
 
+instrument <- all_measurements |> 
+  filter(configAuthor != "LI-COR Default") |> 
+  select(dt, configAuthor) |> 
+  rename(instrument = configAuthor)
+
+clean_all_data <- merge(clean_all_data, instrument, by = "dt")
+
 #### Making cleaner data ####
 
 # Summarizing by individual
 sum_by_individual <- clean_all_data |> 
-  group_by(individual, canopy, period, Date) |> 
+  group_by(instrument, individual, canopy, period, Date, condition) |> 
   summarize(gsw_m = mean(gsw, na.rm = TRUE),
             gsw_sd = sd(gsw, na.rm = TRUE),
             gbw_m = mean(gbw, na.rm = TRUE),
@@ -46,11 +53,11 @@ sum_by_individual <- clean_all_data |>
 
 # Summarizing without individuals (by canopy and time only)
 
-sum_by_canopy <- smaller_measurements |> 
+sum_by_canopy <- clean_all_data |> 
   mutate(gsw_raw = gsw,
          gsw_zeroed = ifelse(gsw <= 0, 0, gsw),
          gsw_rem = ifelse(gsw <= 0, NA, gsw)) |> 
-  group_by(canopy, period, Date) |> 
+  group_by(instrument, canopy, period, Date, condition) |> 
   summarize(gsw_raw_m = mean(gsw_raw, na.rm = TRUE),
             gsw_zeroed_m = mean(gsw_zeroed, na.rm = TRUE),
             gsw_rem_m = mean(gsw_rem, na.rm = TRUE),
@@ -77,24 +84,43 @@ sum_by_canopy <- smaller_measurements |>
   pivot_longer(cols = c(gsw_raw_m, gsw_zeroed_m, gsw_rem_m),
                names_to = "gsw_var",
                values_to = "gsw_m") |> 
-  relocate(dt, Date, time, canopy, period, gsw_var, gsw_m)
+  relocate(dt, Date, time, canopy, period, condition, gsw_var, gsw_m)
+
+deltas <- sum_by_canopy |> 
+  select(instrument, Date, canopy, period, gsw_var, gsw_m) |> 
+  filter(period != "afternoon", gsw_var == "gsw_raw_m") |> select(-gsw_var) |> 
+  pivot_wider(names_from = period, values_from = gsw_m) |> 
+  mutate(delta1 = morning - early,
+         delta2 = midday - morning)
 
 # Marking rain events
 rain_df <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06-30"))),
                       time = c(rep("00:00:00", 3))) |> 
   mutate(dt = as.POSIXct(paste(date, time)))
 
-rects_rain <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06-30"))),
-                         time_start = c(rep("00:00:00", 3)),
-                         time_end = c(rep("2:00:00", 3))) |> 
+rects_rain <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06-30", "2026-07-16", "2026-07-21", "2026-07-23"))),
+                         time_start = c(rep("00:00:00", 6)),
+                         time_end = c(rep("2:00:00", 6))) |> 
   mutate(dt_start = as.POSIXct(paste(date, time_start)),
          dt_end = as.POSIXct(paste(date, time_end)),
          date = as.Date(date))
 
-# Bonus... rects for all times of day
-nuber <- length(unique(smaller_measurements$Date))
+# Defining drought
 
-rects <- data.frame(date = rep(unique(smaller_measurements$Date), 5),
+rects_drought <- data.frame(date_start = c(as.Date(c("2026-06-22", "2026-07-01", "2026-07-16"))),
+                            date_end = c(as.Date(c("2026-07-01", "2026-07-16", "2026-07-24"))),
+                            period = c("predrought", "drought", "recovery"))
+
+# rects_drought <- rects_drought |> 
+#   filter(period == "drought") |> 
+#   pivot_longer(!period, names_to = "label", values_to = "date") |> 
+#   mutate(label = case_when(label == "date_end" ~ "Drought end",
+#                            label == "date_start" ~ "Drought start"))
+
+# Bonus... rects for all times of day
+nuber <- length(unique(clean_all_data$Date))
+
+rects <- data.frame(date = rep(unique(clean_all_data$Date), 5),
                     period = c(rep("early", nuber),
                                rep("morning", nuber),
                                rep("midday", nuber),
