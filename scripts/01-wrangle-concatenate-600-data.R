@@ -24,29 +24,34 @@ for (i in 1:length(all_600_files)) {
       mutate(`Date` = as.Date(`Date`, format = "%m/%d/%Y"))
   }
   
-  # Label each measurement, format date and time
   hold_clean <- hold |> 
-    mutate(individual = c(rep(1, 6), rep(2, 6), rep(1, 6), rep(2, 6), rep(3, 12), rep(4, 12)),
-           canopy = c(rep("lower", 12), rep("upper", 12), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
-           Date = as.Date(Date),
+    mutate(Date = as.Date(Date),
            Time = hms::as_hms(Time))
   
-  # File got weird for this one and recorded the time wrong
-  if (all_600_files[i] == "2026-06-23_early.csv") {
+  # Label each measurement, format date and time
+  if (all_600_files[i] == "2026-06-22_midday.csv" |
+      all_600_files[i] == "2026-06-22_afternoon.csv" |
+      all_600_files[i] == "2026-06-23_early.csv" |
+      all_600_files[i] == "2026-06-23_midday.csv" |
+      all_600_files[i] == "2026-06-24_early.csv" |
+      all_600_files[i] == "2026-06-24_midday.csv") {
     hold_clean <- hold_clean |> 
-      mutate(Time = Time - (3 * 3600 + 600),
-             Time = hms::as_hms(Time))
+      mutate(individual = c(rep(1, 6), rep(2, 6), rep(1, 6), rep(2, 6), rep(3, 12), rep(4, 12)),
+             canopy = c(rep("lower", 12), rep("upper", 12), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
+             dark = as.character(dark))
   }
   
-  # I suck and messed up the order on these ones
-  if (all_600_files[i] == "2026-06-22_morning.csv" | all_600_files[i] == "2026-06-23_morning.csv" | all_600_files[i] == "2026-06-29_early.csv") {
+  # Different order
+  if (all_600_files[i] == "2026-06-22_morning.csv" |
+      all_600_files[i] == "2026-06-23_morning.csv" |
+      all_600_files[i] == "2026-06-29_early.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(2, 6), rep(2, 6), rep(1, 6), rep(3, 12), rep(4, 12)),
              canopy = c(rep("lower", 12), rep("upper", 12), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
              dark = as.character(dark))
   }
   
-  # More of that
+  # Different order
   if (all_600_files[i] == "2026-06-24_morning.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(3, 6), rep(3, 6), rep(2, 6), rep(2, 6), rep(1, 6), rep(4, 6), rep(4, 6), rep(1, 6)),
@@ -54,7 +59,7 @@ for (i in 1:length(all_600_files)) {
              dark = as.character(dark))
   }
   
-  # Also messed up the order
+  # Different order
   if (all_600_files[i] == "2026-06-25_early.csv" |
       all_600_files[i] == "2026-06-25_morning.csv" |
       all_600_files[i] == "2026-06-25_midday.csv" |
@@ -71,18 +76,32 @@ for (i in 1:length(all_600_files)) {
       all_600_files[i] == "2026-07-03_morning.csv" |
       all_600_files[i] == "2026-07-03_midday.csv" |
       all_600_files[i] == "2026-07-07_early.csv" |
-      all_600_files[i] == "2026-07-07_morning.csv") {
+      all_600_files[i] == "2026-07-07_morning.csv" |
+      all_600_files[i] == "2026-07-07_midday.csv" |
+      all_600_files[i] == "2026-07-08_early.csv" |
+      all_600_files[i] == "2026-07-08_morning.csv" |
+      all_600_files[i] == "2026-07-08_midday.csv" |
+      all_600_files[i] == "2026-07-09_early.csv" |
+      all_600_files[i] == "2026-07-09_morning.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(1, 6), rep(2, 6), rep(2, 6), rep(3, 6), rep(3, 6), rep(4, 6), rep(4, 6)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
              dark = as.character(dark))
   }
   
+  # Different order
   if (all_600_files[i] == "2026-07-01_morning.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(1, 6), rep(3, 6), rep(3, 6), rep(2, 6), rep(2, 6), rep(4, 6), rep(4, 6)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
              dark = as.character(dark))
+  }
+  
+  # File got weird for this one and recorded the time wrong
+  if (all_600_files[i] == "2026-06-23_early.csv") {
+    hold_clean <- hold_clean |> 
+      mutate(Time = Time - (3 * 3600 + 600),
+             Time = hms::as_hms(Time))
   }
   
   # Finish cleaning up raw files (make dt, label periods)

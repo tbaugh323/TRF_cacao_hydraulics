@@ -41,3 +41,68 @@ second <- smaller_measurements |>
 
 # It's really humid
 
+
+
+#### Why is the 1670 broken? ####
+
+working_test <- read_csv("data/working_test.csv")
+working_test <- working_test[!grepl("lciSerialNumber", working_test$configName),]
+working_test <- working_test[!grepl("configName", working_test$configName),]
+working_test <- working_test |> 
+  mutate(`Date` = as.Date(`Date`),
+         Time = hms::as_hms(Time)) |>
+  mutate(dt = as.POSIXct(paste(Date, Time))) |> 
+  mutate(across(c(Observation:leaf_width, Fo:batt, rh_adj:Ble, flash_intensity:z_flr), as.numeric)) |> 
+  relocate(dt) |> 
+  filter(configAuthor == "LI-COR Default")
+working_test <- working_test[-1,]
+
+broken_test <- read_csv("data/broken_test.csv")
+broken_test <- broken_test[,-(109:378)]
+broken_test <- broken_test[!grepl("lciSerialNumber", broken_test$configName),]
+broken_test <- broken_test[!grepl("configName", broken_test$configName),]
+broken_test <- broken_test |> 
+  mutate(`Date` = as.Date("2026-07-07")) |> 
+  mutate(`Date` = as.Date(`Date`),
+         Time = hms::as_hms(Time)) |>
+  mutate(dt = as.POSIXct(paste(Date, Time))) |> 
+  mutate(across(c(Observation:leaf_width, Fo:batt, rh_adj:Ble, flash_intensity:z_flr), as.numeric)) |> 
+  relocate(dt) |> 
+  filter(configAuthor == "LI-COR Default") |> 
+  mutate(`Obs#` = row_number(), `Observation` = row_number())
+
+ggplot() +
+  geom_point(data = working_test, aes(x = dt, y = gsw, color = "working"), size = 3) +
+  geom_point(data = broken_test, aes(x = dt, y = gsw, color = "broken"), size = 3)
+
+ggplot() +
+  geom_point(data = working_test, aes(x = dt, y = `Fm'`, color = "working"), size = 3) +
+  geom_point(data = broken_test, aes(x = dt, y = `Fm'`, color = "broken"), size = 3)
+
+ggplot() +
+  geom_point(data = working_test, aes(x = dt, y = rh_s, color = "working"), size = 3) +
+  geom_point(data = broken_test, aes(x = dt, y = rh_s, color = "broken"), size = 3)
+
+ggplot() +
+  geom_point(data = working_test, aes(x = dt, y = flow_s, color = "working"), size = 3) +
+  geom_point(data = broken_test, aes(x = dt, y = flow_s, color = "broken"), size = 3)
+
+
+broken_test2 <- read_csv("data/broken_test2.csv")
+broken_test2 <- broken_test2[!grepl("lciSerialNumber", broken_test2$configName),]
+broken_test2 <- broken_test2[!grepl("configName", broken_test2$configName),]
+broken_test2 <- broken_test2 |> 
+  mutate(`Date` = as.Date(`Date`),
+         Time = hms::as_hms(Time)) |>
+  mutate(dt = as.POSIXct(paste(Date, Time))) |> 
+  mutate(across(c(Observation:leaf_width, Fo:batt, rh_adj:Ble, flash_intensity:z_flr), as.numeric)) |> 
+  relocate(dt) |> 
+  filter(configAuthor == "LI-COR Default")
+
+broken_test2 |> 
+  ggplot(aes(x = dt)) +
+  # geom_point(aes(y = gsw), color = "forestgreen")
+  # geom_point(aes(y = VPleaf), color = "navy")
+  # geom_point(aes(y = `Fm'`), color = "red") +
+  geom_point(aes(y = flow), color = "chocolate1")
+

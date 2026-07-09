@@ -76,7 +76,8 @@ deltas |>
         legend.title = element_text(size = 15),
         legend.text = element_text(size = 13))
 
-raw_timeseries <- clean_all_data |>
+# raw_timeseries <- clean_all_data |>
+clean_all_data |> 
   mutate(condition = factor(condition, levels = c("predrought", "drought", "recovery"))) |> 
   ggplot(aes(x = Time, y = gsw)) +
   geom_hline(aes(yintercept = 0), linetype = "dotted", linewidth = 1, color = "gray50") +
@@ -91,21 +92,46 @@ raw_timeseries <- clean_all_data |>
         legend.text = element_text(size = 13),
         strip.text = element_text(size = 13))
 
-zeroed_timeseries <- clean_all_data |>
-  mutate(gsw = ifelse(gsw < 0, 0, gsw)) |> 
-  mutate(condition = factor(condition, levels = c("predrought", "drought", "recovery"))) |> 
-  ggplot(aes(x = Time, y = gsw)) +
-  geom_hline(aes(yintercept = 0), linetype = "dotted", linewidth = 1, color = "gray50") +
-  geom_point(aes(color = Date), size = 2) +
-  scale_color_viridis_c(option = "turbo", trans = "date") +
-  facet_wrap(~ condition) +
-  labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")"))) +
+# zeroed_timeseries <- clean_all_data |>
+#   mutate(gsw = ifelse(gsw < 0, 0, gsw)) |> 
+#   mutate(condition = factor(condition, levels = c("predrought", "drought", "recovery"))) |> 
+#   ggplot(aes(x = Time, y = gsw)) +
+#   geom_hline(aes(yintercept = 0), linetype = "dotted", linewidth = 1, color = "gray50") +
+#   geom_point(aes(color = Date), size = 2) +
+#   scale_color_viridis_c(option = "turbo", trans = "date") +
+#   facet_wrap(~ condition) +
+#   labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")"))) +
+#   theme(panel.grid = element_blank(),
+#         axis.title = element_text(size = 15),
+#         axis.text = element_text(size = 13),
+#         legend.title = element_text(size = 15),
+#         legend.text = element_text(size = 13),
+#         strip.text = element_text(size = 13))
+# 
+# raw_timeseries / zeroed_timeseries
+
+
+# Looking at flow data
+sum_by_canopy |> 
+  mutate(gsw_var = case_when(gsw_var == "gsw_raw_m" ~ "Raw points",
+                             gsw_var == "gsw_rem_m" ~ "Removed negatives",
+                             gsw_var == "gsw_zeroed_m" ~ "Zeroed negatives")) |>
+  ggplot() +
+  geom_hline(aes(yintercept = 0), linewidth = 1, linetype = "dotted", color = "gray50") +
+  geom_vline(data = rain_df, aes(xintercept = dt), linetype = 2, linewidth = 1, color = "royalblue4") +
+  # geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd, color = canopy, shape = canopy), position = position_dodge(width = 5000), width = 10000) +
+  geom_point(aes(x = dt, y = flow_m, color = canopy, shape = instrument), position = position_dodge(width = 5000), size = 3) +
+  scale_color_manual(values = c("skyblue2", "tomato")) +
+  scale_fill_manual(values = c("salmon2", "skyblue", "goldenrod2", "aquamarine4", "royalblue3")) +
+  labs(y = expression(paste(mu[r], " (", mu, "mol ", s^-1, ")")),
+       x = "Date time",
+       color = "Canopy level",
+       shape = "Canopy level") +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),
         axis.text = element_text(size = 13),
         legend.title = element_text(size = 15),
         legend.text = element_text(size = 13),
         strip.text = element_text(size = 13))
-
-raw_timeseries / zeroed_timeseries
+  # facet_wrap(~ gsw_var, ncol = 1)
 

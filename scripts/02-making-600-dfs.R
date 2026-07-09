@@ -42,7 +42,9 @@ sum_by_individual <- clean_all_data |>
             `Fm'_sd` = sd(`Fm'`, na.rm = TRUE),
             rh_s_m = mean(rh_s, na.rm = TRUE),
             rh_r_m = mean(rh_r, na.rm = TRUE),
-            Tleaf_m = mean(Tleaf, na.rm = TRUE)) |> 
+            Tleaf_m = mean(Tleaf, na.rm = TRUE),
+            flow_m = mean(flow, na.rm = TRUE),
+            flow_s_m = mean(flow_s, na.rm = TRUE)) |> 
   ungroup() |> 
   mutate(time = case_when(period == "early" ~ hms::as_hms("6:00:00"),
                           period == "morning" ~ hms::as_hms("8:00:00"),
@@ -74,7 +76,9 @@ sum_by_canopy <- clean_all_data |>
             `Fm'_sd` = sd(`Fm'`, na.rm = TRUE),
             rh_s_m = mean(rh_s, na.rm = TRUE),
             rh_r_m = mean(rh_r, na.rm = TRUE),
-            Tleaf_m = mean(Tleaf, na.rm = TRUE)) |> 
+            Tleaf_m = mean(Tleaf, na.rm = TRUE),
+            flow_m = mean(flow, na.rm = TRUE),
+            flow_s_m = mean(flow_s, na.rm = TRUE)) |> 
   ungroup() |> 
   mutate(time = case_when(period == "early" ~ hms::as_hms("6:00:00"),
                           period == "morning" ~ hms::as_hms("8:00:00"),

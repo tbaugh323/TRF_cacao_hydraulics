@@ -10,11 +10,11 @@ set.seed(323)
 #### Visualizing ####
 
 # Looking at most recent data
-sum_by_individual |> 
-  filter(Date == as.Date("2026-07-07")) |>
+clean_all_data |> 
+  filter(Date == as.Date("2026-07-09")) |>
   ggplot(aes(color = factor(individual))) +
-  geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), width = 1000) +
-  geom_point(aes(x = dt, y = gsw_m, shape = canopy), size = 3) +
+  # geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), width = 1000) +
+  geom_point(aes(x = dt, y = gsw, shape = canopy), size = 3) +
   scale_color_brewer(palette = "Dark2") +
   labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")),
        x = "Date time",
@@ -24,8 +24,8 @@ sum_by_individual |>
         axis.title = element_text(size = 15),
         axis.text = element_text(size = 13),
         legend.title = element_text(size = 15),
-        legend.text = element_text(size = 13)) +
-  facet_wrap(~ individual, ncol = 1)
+        legend.text = element_text(size = 13))
+  # facet_wrap(~ individual, ncol = 1)
 
 # Grid plots
 gs_raw_points <- sum_by_canopy |> 
