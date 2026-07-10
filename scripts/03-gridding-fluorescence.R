@@ -29,6 +29,7 @@ fm_raw_points <- sum_by_canopy |>
 # facet_wrap(~ Date, scales = "free")
 
 fm_by_period <- sum_by_canopy |> 
+  filter(period != "afternoon") |> 
   ggplot(aes(x = factor(period, levels = c("early", "morning", "midday", "afternoon")), y = `Fm'_m`, group = interaction(factor(period), canopy), color = canopy)) +
   geom_boxplot() +
   # geom_jitter(width = 0.15, size = 2, alpha = 0.3) +

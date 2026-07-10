@@ -71,3 +71,45 @@ second <- sv_gs |>
   theme(panel.grid = element_blank())
 
 second / first
+
+
+
+
+x = 1:53
+y = c(0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0.18,0.18,0.18,0.33,0.33,0.33,0.33,0.41,
+      0.41,0.41,0.41,0.41,0.41,0.5,0.5,0.5,0.5,0.68,0.58,0.58,0.68,0.83,0.83,0.83,
+      0.74,0.74,0.74,0.83,0.83,0.9,0.9,0.9,1,1,1,1,1,1,1)
+
+fitmodel <- nls(y ~ a/(1 + exp(-b * (x - c))), start = list(a=1,b=.5,c=25))
+
+
+sigmoid = function(params, x) {
+  params[1] / (1 + exp(-params[2] * (x - params[3])))
+}
+
+
+params=coef(fitmodel)
+
+y2 <- sigmoid(params,x)
+
+plot(y2,type="l")
+points(y)
+
+
+sv_gs_upper <- sv_gs |> filter(canopy == "upper") |> filter(!is.na(VhrmHRM5_EB))
+
+x = sv_gs_upper$gsw
+y = sv_gs_upper$VhrmHRM5_EB
+
+fitmodel <- nls(y ~ a * exp(-b * x), start = list(a = 0.2, b = 0.5))
+
+expon = function(params, x) {
+  params[1] * exp(-params[2] * x)
+}
+
+params = coef(fitmodel)
+              
+y2 <- expon(params,x)
+
+plot(y2, type = "l")
+points(y)

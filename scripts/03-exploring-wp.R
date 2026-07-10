@@ -13,7 +13,12 @@ wp <- read_sheet("https://docs.google.com/spreadsheets/d/1LdmUZRiTcnKyBLbcdbUDEp
   mutate(time = hms::as_hms(time),
          date = as.Date(date)) |> 
   mutate(canopy = case_when(canopy == "lower" ~ "Lower canopy",
-                            canopy == "upper" ~ "Upper canopy")) |> 
+                            canopy == "upper" ~ "Upper canopy"),
+         month = month(date),
+         day = day(date),
+         condition = case_when(month == 06 ~ "predrought",
+                               month == 07 & day <= 15 ~ "drought",
+                               month == 07 & day > 15 ~ "recovery")) |> 
   filter(!is.na(wp)) |> 
   filter(is.na(comments)) |> 
   mutate(dt = as.POSIXct(paste(date, time))) |> 
@@ -24,7 +29,7 @@ write_csv(wp, "data/all_wp.csv")
 
 # Summarizing
 wp_sum <- wp |> 
-  group_by(individual, canopy, date, period) |> 
+  group_by(individual, canopy, date, period, condition) |> 
   summarize(wp_m = mean(wp),
             wp_sd = sd(wp),
             n = n()) |> 
@@ -108,4 +113,21 @@ wp_sum |>
         strip.text = element_text(size = 13),
         legend.title = element_text(size = 15),
         legend.text = element_text(size = 13))
+
+wp_super_sum <- wp_sum |> 
+  group_by(dt, date, period, canopy, condition) |> 
+  summarize(wp.m = mean(wp_m),
+            wp.sd = sd(wp_m),
+            n = n()) |> ungroup()
+
+wp_super_sum |> 
+  ggplot(aes(x = factor(condition, levels = c("predrought", "drought")), y = wp.m, group = interaction(canopy, period, condition), color = interaction(period, canopy))) +
+  geom_boxplot() +
+  labs(x = "Condition", y = expression(paste(Psi, " (MPa)")), color = "Period, Canopy level") +
+  scale_color_manual(values = c("tomato", "plum3", "skyblue2", "khaki3")) +
+  theme(panel.grid = element_blank())
+
+test_aov <- aov(wp.m ~ canopy + condition, wp_super_sum)
+summary(test_aov)
+# Significant difference between conditions
 

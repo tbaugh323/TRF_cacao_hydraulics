@@ -48,7 +48,7 @@ gs_raw_points <- sum_by_canopy |>
   # facet_wrap(~ Date, scales = "free")
 
 gs_by_period <- sum_by_canopy |> 
-  filter(gsw_var == "gsw_raw_m") |> 
+  filter(gsw_var == "gsw_raw_m", period != "afternoon") |> 
   ggplot(aes(x = factor(period, levels = c("early", "morning", "midday", "afternoon")), y = gsw_m, group = interaction(factor(period), canopy), color = canopy)) +
   geom_boxplot() +
   # geom_jitter(width = 0.15, size = 2, alpha = 0.3) +

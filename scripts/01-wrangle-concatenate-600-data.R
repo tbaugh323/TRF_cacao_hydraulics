@@ -82,7 +82,8 @@ for (i in 1:length(all_600_files)) {
       all_600_files[i] == "2026-07-08_morning.csv" |
       all_600_files[i] == "2026-07-08_midday.csv" |
       all_600_files[i] == "2026-07-09_early.csv" |
-      all_600_files[i] == "2026-07-09_morning.csv") {
+      all_600_files[i] == "2026-07-09_morning.csv" |
+      all_600_files[i] == "2026-07-09_midday.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(1, 6), rep(2, 6), rep(2, 6), rep(3, 6), rep(3, 6), rep(4, 6), rep(4, 6)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
