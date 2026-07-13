@@ -2,6 +2,7 @@
 library(tidyverse)
 library(patchwork)
 library(cowplot)
+library(dygraphs)
 theme_set(theme_bw())
 
 #### Reading and visualizing ####
@@ -50,6 +51,7 @@ sv_gs <- full_join(tree_2_small, gs_small, by = "dt")
 
 sv_gs |> 
   ggplot() +
+  geom_line(aes(x = dt, y = VhrmHRM5_M), color = "forestgreen") +
   geom_point(aes(x = dt, y = VhrmHRM5_M), color = "forestgreen") +
   geom_point(aes(x = dt, y = gsw * 30), color = "chocolate1") +
   scale_y_continuous("Sap flow velocity at 5 cm",
