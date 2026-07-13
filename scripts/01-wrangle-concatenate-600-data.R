@@ -39,61 +39,26 @@ for (i in 1:length(all_600_files)) {
       mutate(individual = c(rep(1, 6), rep(2, 6), rep(1, 6), rep(2, 6), rep(3, 12), rep(4, 12)),
              canopy = c(rep("lower", 12), rep("upper", 12), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
              dark = as.character(dark))
-  }
-  
-  # Different order
-  if (all_600_files[i] == "2026-06-22_morning.csv" |
-      all_600_files[i] == "2026-06-23_morning.csv" |
-      all_600_files[i] == "2026-06-29_early.csv") {
+  } else if (all_600_files[i] == "2026-06-22_morning.csv" |
+             all_600_files[i] == "2026-06-23_morning.csv" |
+             all_600_files[i] == "2026-06-29_early.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(2, 6), rep(2, 6), rep(1, 6), rep(3, 12), rep(4, 12)),
              canopy = c(rep("lower", 12), rep("upper", 12), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
              dark = as.character(dark))
-  }
-  
-  # Different order
-  if (all_600_files[i] == "2026-06-24_morning.csv") {
+  } else if (all_600_files[i] == "2026-06-24_morning.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(3, 6), rep(3, 6), rep(2, 6), rep(2, 6), rep(1, 6), rep(4, 6), rep(4, 6), rep(1, 6)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6)),
              dark = as.character(dark))
-  }
-  
-  # Different order
-  if (all_600_files[i] == "2026-06-25_early.csv" |
-      all_600_files[i] == "2026-06-25_morning.csv" |
-      all_600_files[i] == "2026-06-25_midday.csv" |
-      all_600_files[i] == "2026-06-29_early.csv" |
-      all_600_files[i] == "2026-06-29_morning.csv" |
-      all_600_files[i] == "2026-06-30_early.csv" |
-      all_600_files[i] == "2026-06-30_morning.csv" |
-      all_600_files[i] == "2026-06-30_midday.csv" |
-      all_600_files[i] == "2026-07-01_early.csv" |
-      all_600_files[i] == "2026-07-02_early.csv" |
-      all_600_files[i] == "2026-07-02_morning.csv" |
-      all_600_files[i] == "2026-07-02_midday.csv" |
-      all_600_files[i] == "2026-07-03_early.csv" |
-      all_600_files[i] == "2026-07-03_morning.csv" |
-      all_600_files[i] == "2026-07-03_midday.csv" |
-      all_600_files[i] == "2026-07-07_early.csv" |
-      all_600_files[i] == "2026-07-07_morning.csv" |
-      all_600_files[i] == "2026-07-07_midday.csv" |
-      all_600_files[i] == "2026-07-08_early.csv" |
-      all_600_files[i] == "2026-07-08_morning.csv" |
-      all_600_files[i] == "2026-07-08_midday.csv" |
-      all_600_files[i] == "2026-07-09_early.csv" |
-      all_600_files[i] == "2026-07-09_morning.csv" |
-      all_600_files[i] == "2026-07-09_midday.csv") {
-    hold_clean <- hold_clean |> 
-      mutate(individual = c(rep(1, 6), rep(1, 6), rep(2, 6), rep(2, 6), rep(3, 6), rep(3, 6), rep(4, 6), rep(4, 6)),
-             canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
-             dark = as.character(dark))
-  }
-  
-  # Different order
-  if (all_600_files[i] == "2026-07-01_morning.csv") {
+  } else if (all_600_files[i] == "2026-07-01_morning.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(1, 6), rep(3, 6), rep(3, 6), rep(2, 6), rep(2, 6), rep(4, 6), rep(4, 6)),
+             canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
+             dark = as.character(dark))
+  } else {
+    hold_clean <- hold_clean |> 
+      mutate(individual = c(rep(1, 6), rep(1, 6), rep(2, 6), rep(2, 6), rep(3, 6), rep(3, 6), rep(4, 6), rep(4, 6)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
              dark = as.character(dark))
   }
