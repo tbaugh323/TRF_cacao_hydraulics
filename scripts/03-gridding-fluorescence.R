@@ -11,7 +11,7 @@ set.seed(323)
 
 # Looking at most recent data
 clean_all_data |> 
-  filter(Date == as.Date("2026-07-13")) |>
+  filter(Date == as.Date("2026-07-16")) |>
   ggplot(aes(color = factor(individual))) +
   # geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), width = 1000) +
   geom_point(aes(x = dt, y = `Fm'`, shape = canopy), size = 3) +
@@ -80,3 +80,4 @@ top_fm <- plot_grid(fm_raw_points,
 bottom_fm <- plot_grid(fm_by_period, fm_by_canopy,
                        nrow = 1)
 plot_grid(top_fm, bottom_fm, nrow = 2)
+

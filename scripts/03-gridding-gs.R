@@ -11,7 +11,7 @@ set.seed(323)
 
 # Looking at most recent data
 clean_all_data |> 
-  filter(Date == as.Date("2026-07-13")) |>
+  filter(Date == as.Date("2026-07-16")) |>
   ggplot(aes(color = factor(individual))) +
   # geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), width = 1000) +
   geom_point(aes(x = dt, y = gsw, shape = canopy), size = 3) +
@@ -89,11 +89,25 @@ plot_grid(top_gs, bottom_gs, nrow = 2)
 
 
 
-
 #### Testing ####
+
+sum_by_canopy |> 
+  filter(gsw_var == "gsw_raw_m") |> 
+  group_by(condition) |> 
+  summarize(
+    gsw_var = var(gsw_m),
+    gsw_sd = sd(gsw_m),
+    gsw_max = max(gsw_m),
+    gsw_min = min(gsw_m)
+  ) |> ungroup() |> 
+  mutate(gsw_range = gsw_max - gsw_min)
 
 # Assessing normality of gs
 qqnormsim(gsw, clean_all_data)
+
+clean_all_data |> 
+  ggplot(aes(x = gsw)) +
+  geom_histogram()
 
 gs_sum <- clean_all_data |> 
   group_by(canopy) |> 
@@ -103,6 +117,10 @@ t.test(gs_sum$gsw_m, mu = 0)
 
 # Assessing normality of Fm'
 qqnormsim(`Fm'`, clean_all_data)
+
+clean_all_data |> 
+  ggplot(aes(x = `Fm'`)) +
+  geom_histogram()
 
 fm_sum <- clean_all_data |> 
   group_by(canopy) |> 

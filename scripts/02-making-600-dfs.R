@@ -98,8 +98,8 @@ deltas <- sum_by_canopy |>
          delta2 = midday - morning)
 
 # Marking rain events
-rain_df <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06-30"))),
-                      time = c(rep("00:00:00", 3))) |> 
+rain_df <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06-30", "2026-07-16", "2026-07-21", "2026-07-23"))),
+                      time = c(rep("00:00:00", 6))) |> 
   mutate(dt = as.POSIXct(paste(date, time)))
 
 rects_rain <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06-30", "2026-07-16", "2026-07-21", "2026-07-23"))),
@@ -144,4 +144,10 @@ rects <- data.frame(date = rep(unique(clean_all_data$Date), 5),
          dt_end = case_when(period == "night" ~ as.POSIXct(paste(as.Date(date + 1), time_end)),
                             TRUE ~ as.POSIXct(paste(as.Date(date), time_end))),
          date = as.Date(date))
+
+#### Writing out products ####
+
+write_csv(clean_all_data, "data/clean_all_licor600.csv")
+write_csv(sum_by_individual, "data/licor600_by_individual.csv")
+write_csv(sum_by_canopy, "data/licor600_by_canopy.csv")
 
