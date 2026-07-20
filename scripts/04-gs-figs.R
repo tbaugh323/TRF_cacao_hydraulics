@@ -11,7 +11,7 @@ set.seed(323)
 
 # Looking at most recent data
 clean_all_data |> 
-  filter(Date == as.Date("2026-07-16")) |>
+  filter(Date == as.Date("2026-07-20")) |>
   ggplot(aes(color = factor(individual))) +
   # geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), width = 1000) +
   geom_point(aes(x = dt, y = gsw, shape = canopy), size = 3) +
@@ -38,7 +38,7 @@ gs_raw_points <- sum_by_canopy |>
   scale_color_manual(values = c("skyblue2", "tomato")) +
   labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")),
        x = "Date time",
-       color = "Individual",
+       color = "Canopy level",
        shape = "Canopy level") +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),
