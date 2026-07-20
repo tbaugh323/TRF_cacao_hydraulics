@@ -41,11 +41,12 @@ wp_sum <- wp |>
                         period == "MD" ~ as.POSIXct(paste(date, "11:00:00")))) |> 
   relocate(dt)
 
-wp_PDMD <- wp_sum |> 
-  select(-n, -dt) |> 
+wp_PDMD <- wp |> 
+  select(-dt, -time) |> 
   pivot_wider(names_from = period,
-              values_from = c(wp_m, wp_sd)) |> 
-  rename(PD_m = wp_m_PD, MD_m = wp_m_MD, PD_sd = wp_sd_PD, MD_sd = wp_sd_MD)
+              values_from = wp) |> 
+  rename(PD_m = PD, MD_m = MD)
+  # rename(PD_m = wp_m_PD, MD_m = wp_m_MD, PD_sd = wp_sd_PD, MD_sd = wp_sd_MD)
 
 write_csv(wp_PDMD, "data/wp_PDMD.csv")
 
@@ -133,8 +134,8 @@ wp_sum |>
 wp_PDMD |> 
   ggplot() +
   geom_abline(aes(slope = 1, intercept = 0), linetype = "dashed", linewidth = 1) +
-  geom_errorbar(aes(x = PD_m, ymin = MD_m - MD_sd, ymax = MD_m + MD_sd, color = date), alpha = 0.7, width = 0.05) +
-  geom_errorbar(aes(y = MD_m, xmin = PD_m - PD_sd, xmax = PD_m + PD_sd, color = date), alpha = 0.7, width = 0.05) +
+  # geom_errorbar(aes(x = PD_m, ymin = MD_m - MD_sd, ymax = MD_m + MD_sd, color = date), alpha = 0.7, width = 0.05) +
+  # geom_errorbar(aes(y = MD_m, xmin = PD_m - PD_sd, xmax = PD_m + PD_sd, color = date), alpha = 0.7, width = 0.05) +
   geom_point(aes(x = PD_m, y = MD_m, color = date, shape = canopy), size = 2.5) +
   scale_x_continuous(limits = c(-3, 0)) +
   scale_y_continuous(limits = c(-3, 0)) +

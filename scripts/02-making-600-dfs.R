@@ -44,13 +44,14 @@ sum_by_individual <- clean_all_data |>
             rh_r_m = mean(rh_r, na.rm = TRUE),
             Tleaf_m = mean(Tleaf, na.rm = TRUE),
             flow_m = mean(flow, na.rm = TRUE),
-            flow_s_m = mean(flow_s, na.rm = TRUE)) |> 
+            flow_s_m = mean(flow_s, na.rm = TRUE),
+            time = first(Time)) |> 
   ungroup() |> 
-  mutate(time = case_when(period == "early" ~ hms::as_hms("6:00:00"),
-                          period == "morning" ~ hms::as_hms("8:00:00"),
-                          period == "midday" ~ hms::as_hms("12:00:00"),
-                          period == "afternoon" ~ hms::as_hms("18:30:00")),
-         dt = as.POSIXct(paste(Date, time))) |> 
+  # mutate(time = case_when(period == "early" ~ hms::as_hms("6:00:00"),
+  #                         period == "morning" ~ hms::as_hms("8:00:00"),
+  #                         period == "midday" ~ hms::as_hms("12:00:00"),
+  #                         period == "afternoon" ~ hms::as_hms("18:30:00")))) |> 
+  mutate(dt = as.POSIXct(paste(Date, time))) |> 
   relocate(dt, Date, time)
 
 # Summarizing without individuals (by canopy and time only)
@@ -78,13 +79,14 @@ sum_by_canopy <- clean_all_data |>
             rh_r_m = mean(rh_r, na.rm = TRUE),
             Tleaf_m = mean(Tleaf, na.rm = TRUE),
             flow_m = mean(flow, na.rm = TRUE),
-            flow_s_m = mean(flow_s, na.rm = TRUE)) |> 
+            flow_s_m = mean(flow_s, na.rm = TRUE),
+            time = first(Time)) |> 
   ungroup() |> 
-  mutate(time = case_when(period == "early" ~ hms::as_hms("6:00:00"),
-                          period == "morning" ~ hms::as_hms("8:00:00"),
-                          period == "midday" ~ hms::as_hms("12:00:00"),
-                          period == "afternoon" ~ hms::as_hms("18:30:00")),
-         dt = as.POSIXct(paste(Date, time))) |> 
+  # mutate(time = case_when(period == "early" ~ hms::as_hms("6:00:00"),
+  #                         period == "morning" ~ hms::as_hms("8:00:00"),
+  #                         period == "midday" ~ hms::as_hms("12:00:00"),
+  #                         period == "afternoon" ~ hms::as_hms("18:30:00"))) |> 
+  mutate(dt = as.POSIXct(paste(Date, time))) |> 
   pivot_longer(cols = c(gsw_raw_m, gsw_zeroed_m, gsw_rem_m),
                names_to = "gsw_var",
                values_to = "gsw_m") |> 
@@ -122,28 +124,28 @@ rects_drought <- data.frame(date_start = c(as.Date(c("2026-06-22", "2026-07-01",
 #                            label == "date_start" ~ "Drought start"))
 
 # Bonus... rects for all times of day
-nuber <- length(unique(clean_all_data$Date))
-
-rects <- data.frame(date = rep(unique(clean_all_data$Date), 5),
-                    period = c(rep("early", nuber),
-                               rep("morning", nuber),
-                               rep("midday", nuber),
-                               rep("afternoon", nuber),
-                               rep("night", nuber)),
-                    time_start = c(rep("4:00:00", nuber),
-                                   rep("7:00:00", nuber),
-                                   rep("10:00:00", nuber),
-                                   rep("14:00:00", nuber),
-                                   rep("20:00:00", nuber)),
-                    time_end = c(rep("7:00:00", nuber),
-                                 rep("10:00:00", nuber),
-                                 rep("14:00:00", nuber),
-                                 rep("20:00:00", nuber),
-                                 rep("4:00:00", nuber))) |> 
-  mutate(dt_start = as.POSIXct(paste(date, time_start)),
-         dt_end = case_when(period == "night" ~ as.POSIXct(paste(as.Date(date + 1), time_end)),
-                            TRUE ~ as.POSIXct(paste(as.Date(date), time_end))),
-         date = as.Date(date))
+# nuber <- length(unique(clean_all_data$Date))
+# 
+# rects <- data.frame(date = rep(unique(clean_all_data$Date), 5),
+#                     period = c(rep("early", nuber),
+#                                rep("morning", nuber),
+#                                rep("midday", nuber),
+#                                rep("afternoon", nuber),
+#                                rep("night", nuber)),
+#                     time_start = c(rep("4:00:00", nuber),
+#                                    rep("7:00:00", nuber),
+#                                    rep("10:00:00", nuber),
+#                                    rep("14:00:00", nuber),
+#                                    rep("20:00:00", nuber)),
+#                     time_end = c(rep("7:00:00", nuber),
+#                                  rep("10:00:00", nuber),
+#                                  rep("14:00:00", nuber),
+#                                  rep("20:00:00", nuber),
+#                                  rep("4:00:00", nuber))) |> 
+#   mutate(dt_start = as.POSIXct(paste(date, time_start)),
+#          dt_end = case_when(period == "night" ~ as.POSIXct(paste(as.Date(date + 1), time_end)),
+#                             TRUE ~ as.POSIXct(paste(as.Date(date), time_end))),
+#          date = as.Date(date))
 
 #### Writing out products ####
 

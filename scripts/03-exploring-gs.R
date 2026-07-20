@@ -20,7 +20,7 @@ sum_by_canopy |>
   #                             xmin = dt_end,
   #                             ymin = -Inf,
   #                             ymax = Inf,
-  #                             fill = period), alpha = 0.5) +
+  #                             fill = period), alpha = 0.2) +
   geom_hline(aes(yintercept = 0), linewidth = 1, linetype = "dotted", color = "gray50") +
   geom_vline(data = rain_df, aes(xintercept = dt), linetype = 2, linewidth = 1, color = "royalblue4") +
   geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd, color = canopy, shape = canopy), position = position_dodge(width = 5000), width = 10000) +
