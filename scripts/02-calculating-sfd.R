@@ -1,6 +1,7 @@
 #### Calculating SFD ####
+# Sap flow data already processed in different project by Justin Beslity
 
-tree_2_all <- read_csv("data/sap_flow/tree_2/tree_2_all.csv")
+tree_2_all <- read_csv("data/sap_flow/tree_2_all.csv")
 # remotes::install_github("the-Hull/TREX")
 library(TREX)
 
@@ -46,19 +47,25 @@ lines(output.data$sfd.pd$q975[1:1000, ], lty=1,col="grey")
 lines(output.data$sfd.pd$sfd[1:1000, ])
 
 sfd_data <- output.data$sfd.dr$sfd
+
 sfd_new <- aggregate(sfd_data, unique(zoo::index(output.data$sfd.dr$sfd)), mean)
 
 sfd_new_hold <- data.frame(sfd_data)
 sfd_new_hold <- rownames_to_column(sfd_new_hold, "dt") |> 
-  mutate(dt = strftime(dt, format = "%Y-%m-%d %H:%M:%S"))
+  mutate(year = as.integer(lubridate::year(dt)),
+         doy = as.integer(strftime(dt, format = "%j")),
+         hour = data.table::as.ITime(dt)) |> 
+  dplyr::select(-dt) |> rename(value = sfd_data)
 
 sfd_new <- is.trex(sfd_new_hold,
                    tz="GMT",
-                   time.format="%Y-%m-%d %H:%M:%S",
+                   time.format="%H:%M:%S",
                    solar.time=T,
                    long.deg=7.7459,
                    ref.add=FALSE,
                    df=FALSE)
+
+sfd_new <- aggregate(sfd_new, identity, tail, 1)
 
 output<- out.data(input=sfd_new,
                   vpd.input=vpd, 
