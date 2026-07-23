@@ -2,14 +2,14 @@
 library(tidyverse)
 
 # List all relevant datafiles
-all_600_files <- list.files("data/licor600_raw_data/")
+all_600_files <- list.files("data/licor600_data/licor600_raw_data/")
 
 # Initialize dataframe
 all_measurements <- data.frame(Date = NA, Time = NA)
 
 for (i in 1:length(all_600_files)) {
   # Read in each file, delete extra headers
-  hold <- read_csv(paste0("data/licor600_raw_data/", all_600_files[i]))
+  hold <- read_csv(paste0("data/licor600_data/licor600_raw_data/", all_600_files[i]))
   hold <- hold[!grepl("lciSerialNumber", hold$configName),]
   hold <- hold[!grepl("configName", hold$configName),]
   
@@ -61,7 +61,7 @@ for (i in 1:length(all_600_files)) {
       mutate(individual = c(rep(1, 6), rep(1, 6), rep(3, 6), rep(3, 6), rep(2, 6), rep(2, 6), rep(4, 6), rep(4, 6)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6)),
              dark = as.character(dark))
-  } else if (all_600_files[i] == "2026-07-16_midday.csv") {
+  } else if (all_600_files[i] == "2026-07-16_midday.csv" | all_600_files[i] == "2026-07-22_early.csv") {
     hold_clean <- hold_clean |> 
       mutate(individual = c(rep(1, 6), rep(1, 6), rep(2, 6), rep(2, 6), rep(3, 6), rep(3, 6), rep(4, 6), rep(4, 4)),
              canopy = c(rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 6), rep("lower", 6), rep("upper", 4)),
@@ -100,4 +100,4 @@ for (i in 1:length(all_600_files)) {
 }
 
 # Write it out
-write_csv(all_measurements, "data/all_licor600.csv")
+write_csv(all_measurements, "data/licor600_data/all_licor600.csv")

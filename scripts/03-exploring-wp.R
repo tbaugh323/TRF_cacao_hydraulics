@@ -28,7 +28,7 @@ wp <- read_sheet("https://docs.google.com/spreadsheets/d/1LdmUZRiTcnKyBLbcdbUDEp
   relocate(dt)
 
 # Writing out to have locally
-write_csv(wp, "data/all_wp.csv")
+write_csv(wp, "data/water_potential/all_wp.csv")
 
 # Summarizing
 wp_sum <- wp |> 
@@ -41,14 +41,23 @@ wp_sum <- wp |>
                         period == "MD" ~ as.POSIXct(paste(date, "11:00:00")))) |> 
   relocate(dt)
 
-wp_PDMD <- wp |> 
-  select(-dt, -time) |> 
+wp_PDMD <- wp_sum |> 
+  dplyr::select(-dt, -n) |> 
   pivot_wider(names_from = period,
-              values_from = wp) |> 
-  rename(PD_m = PD, MD_m = MD)
+              values_from = c(wp_m, wp_sd)) |> 
+  # rename(PD_m = PD, MD_m = MD)
+  rename(PD_m = wp_m_PD, MD_m = wp_m_MD, PD_sd = wp_sd_PD, MD_sd = wp_sd_MD)
+
+# wp_PDMD <- wp |> 
+#   dplyr::select(-dt, -date, -time) |> 
+#   pivot_wider(names_from = period,
+#               values_from = wp) |> 
+#   rename(PD_m = PD, MD_m = MD)
   # rename(PD_m = wp_m_PD, MD_m = wp_m_MD, PD_sd = wp_sd_PD, MD_sd = wp_sd_MD)
 
-write_csv(wp_PDMD, "data/wp_PDMD.csv")
+
+write_csv(wp_sum, "data/water_potential/wp_PDMD_long.csv")
+write_csv(wp_PDMD, "data/water_potential/wp_PDMD.csv")
 
 #### Visualizing ####
 

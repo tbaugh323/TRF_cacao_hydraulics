@@ -11,7 +11,7 @@ set.seed(323)
 
 # Looking at most recent data
 clean_all_data |> 
-  filter(Date == as.Date("2026-07-20")) |>
+  filter(Date == as.Date("2026-07-22")) |>
   ggplot(aes(color = factor(individual))) +
   # geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), width = 1000) +
   geom_point(aes(x = dt, y = gsw, shape = canopy), size = 3) +

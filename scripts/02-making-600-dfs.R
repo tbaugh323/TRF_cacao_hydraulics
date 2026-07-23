@@ -5,7 +5,7 @@ set.seed(323)
 
 #### Reading ####
 
-all_measurements <- read_csv("data/all_licor600.csv") |> 
+all_measurements <- read_csv("data/licor600_data/all_licor600.csv") |> 
   mutate(dt = as.POSIXct(paste(Date, Time), format = "%Y-%m-%d %H:%M:%OS"))
 # Works better if you just run the wrangle-concatenate script
 
@@ -18,7 +18,7 @@ clean_all_data <- all_measurements |>
 
 instrument <- all_measurements |> 
   filter(configAuthor != "LI-COR Default") |> 
-  select(dt, configAuthor) |> 
+  dplyr::select(dt, configAuthor) |> 
   rename(instrument = configAuthor)
 
 clean_all_data <- merge(clean_all_data, instrument, by = "dt")
@@ -93,8 +93,8 @@ sum_by_canopy <- clean_all_data |>
   relocate(dt, Date, time, canopy, period, condition, gsw_var, gsw_m)
 
 deltas <- sum_by_canopy |> 
-  select(instrument, Date, canopy, period, gsw_var, gsw_m) |> 
-  filter(period != "afternoon", gsw_var == "gsw_raw_m") |> select(-gsw_var) |> 
+  dplyr::select(instrument, Date, canopy, period, gsw_var, gsw_m) |> 
+  filter(period != "afternoon", gsw_var == "gsw_raw_m") |> dplyr::select(-gsw_var) |> 
   pivot_wider(names_from = period, values_from = gsw_m) |> 
   mutate(delta1 = morning - early,
          delta2 = midday - morning)
@@ -116,6 +116,8 @@ rects_rain <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06
 rects_drought <- data.frame(date_start = c(as.Date(c("2026-06-22", "2026-07-01", "2026-07-16"))),
                             date_end = c(as.Date(c("2026-07-01", "2026-07-16", "2026-07-24"))),
                             period = c("predrought", "drought", "recovery"))
+rects_drought$date_end[3] <- Inf
+rects_drought$date_start[1] <- -Inf
 
 # rects_drought <- rects_drought |> 
 #   filter(period == "drought") |> 
@@ -149,7 +151,7 @@ rects_drought <- data.frame(date_start = c(as.Date(c("2026-06-22", "2026-07-01",
 
 #### Writing out products ####
 
-write_csv(clean_all_data, "data/clean_all_licor600.csv")
-write_csv(sum_by_individual, "data/licor600_by_individual.csv")
-write_csv(sum_by_canopy, "data/licor600_by_canopy.csv")
+write_csv(clean_all_data, "data/licor600_data/clean_all_licor600.csv")
+write_csv(sum_by_individual, "data/licor600_data/licor600_by_individual.csv")
+write_csv(sum_by_canopy, "data/licor600_data/licor600_by_canopy.csv")
 
