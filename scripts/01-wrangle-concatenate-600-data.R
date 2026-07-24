@@ -99,5 +99,5 @@ for (i in 1:length(all_600_files)) {
   all_measurements <- bind_rows(hold_clean, all_measurements)
 }
 
-# Write it out
+# Write it out in LOCAL TIME
 write_csv(all_measurements, "data/licor600_data/all_licor600.csv")

@@ -11,7 +11,7 @@ set.seed(323)
 
 # Looking at most recent data
 clean_all_data |> 
-  filter(Date == as.Date("2026-07-22")) |>
+  filter(Date == as.Date("2026-07-23")) |>
   ggplot(aes(color = factor(individual))) +
   # geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd), width = 1000) +
   geom_point(aes(x = dt, y = gsw, shape = canopy), size = 3) +
@@ -92,13 +92,13 @@ plot_grid(top_gs, bottom_gs, nrow = 2)
 #### Testing ####
 
 sum_by_canopy |> 
-  filter(gsw_var == "gsw_raw_m") |> 
+  filter(gsw_var == "gsw_zeroed_m") |> 
   group_by(condition) |> 
   summarize(
-    gsw_var = var(gsw_m),
-    gsw_sd = sd(gsw_m),
-    gsw_max = max(gsw_m),
-    gsw_min = min(gsw_m)
+    gsw_var = var(gsw_m, na.rm = TRUE),
+    gsw_sd = sd(gsw_m, na.rm = TRUE),
+    gsw_max = max(gsw_m, na.rm = TRUE),
+    gsw_min = min(gsw_m, na.rm = TRUE)
   ) |> ungroup() |> 
   mutate(gsw_range = gsw_max - gsw_min)
 

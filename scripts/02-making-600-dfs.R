@@ -5,6 +5,7 @@ set.seed(323)
 
 #### Reading ####
 
+# in local time
 all_measurements <- read_csv("data/licor600_data/all_licor600.csv") |> 
   mutate(dt = as.POSIXct(paste(Date, Time), format = "%Y-%m-%d %H:%M:%OS"))
 # Works better if you just run the wrangle-concatenate script

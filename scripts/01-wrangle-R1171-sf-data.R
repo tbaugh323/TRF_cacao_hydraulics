@@ -26,8 +26,10 @@ for (i in 1:length(tree_2_raw)) {
 
 tree_2_clean <- tree_2_all |> 
   mutate(Date = as.Date(Datetime),
-         TreeID = "BioR1171") |> 
+         TreeID = "BioR1171",
+         Datetime = lubridate::force_tz(Datetime, "America/Phoenix")) |> 
   rename(Tree_ID = TreeID)
 
+# Writing out IN LOCAL TIME
 write_csv(tree_2_clean, "data/sap_flow/raw_sapflow/R1171-postprocess.csv")
 
