@@ -8,7 +8,8 @@ wp_PDMD <- read_csv("data/water_potential/wp_PDMD.csv") |>
                              individual == 2 ~ "BioR1171",
                              individual == 3 ~ "BioR1170",
                              individual == 4 ~ "BioR1191"))
-all_dendros <- read_csv("data/dendro_data/all_dendros.csv")
+all_dendros <- read_csv("data/dendro_data/all_dendros.csv") |> 
+  mutate(datetime = as.POSIXct(datetime, tz = "America/Phoenix"))
 
 #### Joining #### 
 

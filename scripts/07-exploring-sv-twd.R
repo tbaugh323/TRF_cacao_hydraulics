@@ -4,6 +4,7 @@ theme_set(theme_bw())
 
 #### Reading ####
 sv_all <- read_csv("data/sap_flow/sv_all.csv") |> 
+  mutate(dt = as.POSIXct(dt, tz = "America/Phoenix")) |> 
   mutate(Tree_ID_location = Tree_ID) |> 
   mutate(Tree_ID = case_when(Tree_ID == "BioR1171_T" ~ "BioR1171",
                              Tree_ID == "BioR1171_NB" ~ "BioR1171",
@@ -15,6 +16,7 @@ sv_all <- read_csv("data/sap_flow/sv_all.csv") |>
                              TRUE ~ Tree_ID))
   
 all_dendros <- read_csv("data/dendro_data/all_dendros.csv") |> 
+  mutate(datetime = as.POSIXct(datetime, tz = "America/Phoenix")) |> 
   rename(dt = datetime)
 
 lambda_sv_norm <- read_csv("data/sap_flow/lambda_sv_norm.csv") |> 
