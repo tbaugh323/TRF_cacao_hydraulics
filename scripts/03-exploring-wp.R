@@ -24,7 +24,7 @@ wp <- read_sheet("https://docs.google.com/spreadsheets/d/1LdmUZRiTcnKyBLbcdbUDEp
                            individual == 1 ~ 2)) |> 
   filter(!is.na(wp)) |> 
   filter(is.na(comments)) |> 
-  mutate(dt = as.POSIXct(paste(date, time))) |> 
+  mutate(dt = as.POSIXct(paste(date, time), tz = "America/Phoenix")) |> 
   relocate(dt)
 
 # Writing out to have locally
@@ -39,6 +39,7 @@ wp_sum <- wp |>
   ungroup() |> 
   mutate(dt = case_when(period == "PD" ~ as.POSIXct(paste(date, "4:30:00")),
                         period == "MD" ~ as.POSIXct(paste(date, "11:00:00")))) |> 
+  mutate(dt = as.POSIXct(dt, tz = "America/Phoenix")) |> 
   relocate(dt)
 
 wp_PDMD <- wp_sum |> 
@@ -54,7 +55,6 @@ wp_PDMD <- wp_sum |>
 #               values_from = wp) |> 
 #   rename(PD_m = PD, MD_m = MD)
   # rename(PD_m = wp_m_PD, MD_m = wp_m_MD, PD_sd = wp_sd_PD, MD_sd = wp_sd_MD)
-
 
 write_csv(wp_sum, "data/water_potential/wp_PDMD_long.csv")
 write_csv(wp_PDMD, "data/water_potential/wp_PDMD.csv")
@@ -113,6 +113,7 @@ wp |>
 #         legend.text = element_text(size = 13))
 
 # Time series with background colors and rain events
+# just two lines
 wp_sum |> 
   ggplot() +
   geom_rect(data = rects_drought |> filter(period == "drought"),
@@ -121,10 +122,18 @@ wp_sum |>
   geom_rect(data = rects_drought |> filter(period != "drought"),
             aes(xmin = date_start, xmax = date_end, ymin = -Inf, ymax = Inf),
             fill = "palegreen4", alpha = 0.3) +
-  geom_vline(data = rects_rain, aes(xintercept = date), linetype = "dashed", linewidth = 1, color = "royalblue4") +
-  geom_errorbar(aes(x = dt, y = wp_m, ymin = wp_m - wp_sd, ymax = wp_m + wp_sd, color = factor(individual)), position = position_dodge(width = 70000), width = 100000) +
-  # geom_line(aes(x = dt, y = wp_m, color = factor(individual), group = interaction(period, individual)), position = position_dodge(width = 70000), linewidth = 0.75) +
-  geom_point(aes(x = dt, y = wp_m, color = factor(individual), shape = period), position = position_dodge(width = 70000), size = 4) +
+  geom_vline(data = rects_rain, aes(xintercept = date), 
+             linetype = "dashed", linewidth = 1, color = "royalblue4") +
+  geom_errorbar(aes(x = dt, y = wp_m, ymin = wp_m - wp_sd, ymax = wp_m + wp_sd, color = factor(individual)), 
+                position = position_dodge(width = 70000), width = 100000, alpha = 0.5) +
+  geom_line(data = wp_sum |> filter(individual == 2 & period == "PD"), 
+            aes(x = dt, y = wp_m, group = interaction(individual, period)), 
+            color = "#d95f02ff", position = position_dodge(width = 70000), linewidth = 0.75, alpha = 0.7) +
+  geom_line(data = wp_sum |> filter(individual == 1 & period == "PD"), 
+            aes(x = dt, y = wp_m, group = interaction(individual, period)), 
+            color = "#1b9e77ff", position = position_dodge(width = 70000), linewidth = 0.75, alpha = 0.7) +
+  geom_point(aes(x = dt, y = wp_m, color = factor(individual), 
+                 shape = period), position = position_dodge(width = 70000), size = 4) +
   facet_wrap(~canopy, ncol = 1) +
   # scale_color_manual(values = c("mediumseagreen", "chocolate2", "slateblue3", "deeppink2")) +
   scale_color_brewer(palette = "Dark2") +
@@ -182,13 +191,13 @@ hydroscape_canopy <- wp_PDMD |>
   # add_row(individual = NA, level = NA, canopy = "Lower canopy", date = NA, condition = NA, MD_m = regress_l$coefficients[1] / (1 - regress_l$coefficients[2]), PD_m = regress_l$coefficients[1] / (1 - regress_l$coefficients[2]), MD_sd = NA, PD_sd = NA)
 
 hydroscape_coords_u <- data.frame(hydroscape_canopy$PD_m, hydroscape_canopy$MD_m, hydroscape_canopy$canopy) |> 
-  filter(hydroscape_canopy.canopy == "Upper canopy") |> select(-hydroscape_canopy.canopy)
+  filter(hydroscape_canopy.canopy == "Upper canopy") |> dplyr::select(-hydroscape_canopy.canopy)
 hydroscape_poly_u <- Polygon(hydroscape_coords_u, hole = F)
 hydroscape_area_u <- hydroscape_poly_u@area
 hydroscape_area_u # Area of upper canopy points
 
 hydroscape_coords_l <- data.frame(hydroscape_canopy$PD_m, hydroscape_canopy$MD_m, hydroscape_canopy$canopy) |> 
-  filter(hydroscape_canopy.canopy == "Lower canopy") |> select(-hydroscape_canopy.canopy)
+  filter(hydroscape_canopy.canopy == "Lower canopy") |> dplyr::select(-hydroscape_canopy.canopy)
 hydroscape_poly_l <- Polygon(hydroscape_coords_l, hole = F)
 hydroscape_area_l <- hydroscape_poly_l@area
 hydroscape_area_l # Area of upper canopy points
@@ -205,13 +214,13 @@ hydroscape_level <- wp_PDMD |>
 # add_row(individual = NA, level = 3, canopy = NA, date = NA, condition = NA, MD_m = regress_3$coefficients[1] / (1 - regress_3$coefficients[2]), PD_m = regress_3$coefficients[1] / (1 - regress_3$coefficients[2]), MD_sd = NA, PD_sd = NA)
 
 hydroscape_coords_2 <- data.frame(hydroscape_level$PD_m, hydroscape_level$MD_m, hydroscape_level$level) |> 
-  filter(hydroscape_level.level == 2) |> select(-hydroscape_level.level)
+  filter(hydroscape_level.level == 2) |> dplyr::select(-hydroscape_level.level)
 hydroscape_poly_2 <- Polygon(hydroscape_coords_2, hole = F)
 hydroscape_area_2 <- hydroscape_poly_2@area
 hydroscape_area_2 # Area of level 2 points
 
 hydroscape_coords_3 <- data.frame(hydroscape_level$PD_m, hydroscape_level$MD_m, hydroscape_level$level) |> 
-  filter(hydroscape_level.level == 3) |> select(-hydroscape_level.level)
+  filter(hydroscape_level.level == 3) |> dplyr::select(-hydroscape_level.level)
 hydroscape_poly_3 <- Polygon(hydroscape_coords_3, hole = F)
 hydroscape_area_3 <- hydroscape_poly_3@area
 hydroscape_area_3 # Area of level 3 points
