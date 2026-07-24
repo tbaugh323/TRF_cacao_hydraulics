@@ -6,13 +6,18 @@ library(dygraphs)
 theme_set(theme_bw())
 
 #### Reading ####
+# this one is IN MST
 wp_PDMD_long <- read_csv("data/water_potential/wp_PDMD_long.csv") |> 
   mutate(Tree_ID = case_when(individual == 1 ~ "BioR1192",
                              individual == 2 ~ "BioR1171",
                              individual == 3 ~ "BioR1170",
-                             individual == 4 ~ "BioR1192"))
+                             individual == 4 ~ "BioR1192"),
+         dt = as.POSIXct(dt, tz = "MST"))
+# this one is IN UTC
 R1171 <- read_csv("data/sap_flow/raw_sapflow/R1171-postprocess.csv") |> 
-  rename(date = Date)
+  rename(date = Date) |> 
+  mutate(Datetime = as.POSIXct(Datetime, tz = "MST"),
+         date = as.Date(Datetime))
 
 #### Finding overlap with manual water potential data ####
 

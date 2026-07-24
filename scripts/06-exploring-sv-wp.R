@@ -13,17 +13,20 @@ wp_PDMD_long <- read_csv("data/water_potential/wp_PDMD_long.csv") |>
                              TRUE ~ Tree_ID))
 
 R1171 <- read_csv("data/sap_flow/raw_sapflow/R1171-postprocess.csv") |> 
+  mutate(Datetime = as.POSIXct(Datetime, tz = "America/Phoenix")) |> 
   rename(date = Date) |> 
   mutate(Tree_ID = paste0(Tree_ID, "_", location)) |> 
   dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
 
 R1132 <- read_csv("data/sap_flow/raw_sapflow/R1132-postprocess.csv") |> 
+  mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
   mutate(date = as.Date(Datetime),
          TreeID = "BioR1132") |> 
   rename(Tree_ID = TreeID) |> 
   dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
 
 R1192 <- read_csv("data/sap_flow/raw_sapflow/R1192B-postprocess.csv") |> 
+  mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
   mutate(date = as.Date(Datetime),
          TreeID = "BioR1192") |> 
   rename(Tree_ID = TreeID) |> 
@@ -32,6 +35,7 @@ R1192 <- read_csv("data/sap_flow/raw_sapflow/R1192B-postprocess.csv") |>
 # Writing this out
 sv_all <- rbind(R1171, R1132, R1192) |> 
   rename(dt = Datetime)
+# Writing out IN LOCAL TIME
 write_csv(sv_all, "data/sap_flow/sv_all.csv")
 
 #### Joining ####
