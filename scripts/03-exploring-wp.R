@@ -4,7 +4,7 @@ library(googledrive)
 library(googlesheets4)
 library(janitor)
 library(RColorBrewer)
-library(sp)
+# library(sp)
 theme_set(theme_bw())
 
 #### Reading ####
@@ -28,7 +28,7 @@ wp <- read_sheet("https://docs.google.com/spreadsheets/d/1LdmUZRiTcnKyBLbcdbUDEp
   relocate(dt)
 
 # Writing out to have locally
-write_csv(wp, "data/water_potential/all_wp.csv")
+# write_csv(wp, "data/water_potential/all_wp.csv")
 
 # Summarizing
 wp_sum <- wp |> 
@@ -56,8 +56,8 @@ wp_PDMD <- wp_sum |>
 #   rename(PD_m = PD, MD_m = MD)
   # rename(PD_m = wp_m_PD, MD_m = wp_m_MD, PD_sd = wp_sd_PD, MD_sd = wp_sd_MD)
 
-write_csv(wp_sum, "data/water_potential/wp_PDMD_long.csv")
-write_csv(wp_PDMD, "data/water_potential/wp_PDMD.csv")
+# write_csv(wp_sum, "data/water_potential/wp_PDMD_long.csv")
+# write_csv(wp_PDMD, "data/water_potential/wp_PDMD.csv")
 
 #### Visualizing ####
 
@@ -115,6 +115,10 @@ wp |>
 # Time series with background colors and rain events
 # just two lines
 wp_sum |> 
+  mutate(individual = case_when(individual == 1 ~ "BioR1192",
+                                 individual == 2 ~ "BioR1171",
+                                 individual == 3 ~ "BioR1170",
+                                 individual == 4 ~ "BioR1191")) |> 
   ggplot() +
   geom_rect(data = rects_drought |> filter(period == "drought"),
             aes(xmin = date_start, xmax = date_end, ymin = -Inf, ymax = Inf),
@@ -124,18 +128,22 @@ wp_sum |>
             fill = "palegreen4", alpha = 0.3) +
   geom_vline(data = rects_rain, aes(xintercept = date), 
              linetype = "dashed", linewidth = 1, color = "royalblue4") +
-  geom_errorbar(aes(x = dt, y = wp_m, ymin = wp_m - wp_sd, ymax = wp_m + wp_sd, color = factor(individual)), 
-                position = position_dodge(width = 70000), width = 100000, alpha = 0.5) +
+  geom_errorbar(aes(x = dt, y = wp_m, ymin = wp_m - wp_sd, ymax = wp_m + wp_sd, 
+                    color = factor(individual, levels = c("BioR1192", "BioR1171", "BioR1170", "BioR1191"))), 
+                position = position_dodge(width = 70000), width = 100000, 
+                alpha = 0.5) +
   geom_line(data = wp_sum |> filter(individual == 2 & period == "PD"), 
             aes(x = dt, y = wp_m, group = interaction(individual, period)), 
-            color = "#d95f02ff", position = position_dodge(width = 70000), linewidth = 0.75, alpha = 0.7) +
-  geom_line(data = wp_sum |> filter(individual == 1 & period == "PD"), 
+            color = "#d95f02ff", position = position_dodge(width = 70000), 
+            linewidth = 0.75, alpha = 0.7) +
+  geom_line(data = wp_sum |> filter(individual == 3 & period == "PD"), 
             aes(x = dt, y = wp_m, group = interaction(individual, period)), 
-            color = "#1b9e77ff", position = position_dodge(width = 70000), linewidth = 0.75, alpha = 0.7) +
-  geom_point(aes(x = dt, y = wp_m, color = factor(individual), 
-                 shape = period), position = position_dodge(width = 70000), size = 4) +
+            color = "#7570b3ff", position = position_dodge(width = 70000), 
+            linewidth = 0.75, alpha = 0.7) +
+  geom_point(aes(x = dt, y = wp_m, color = factor(individual, levels = c("BioR1192", "BioR1171", "BioR1170", "BioR1191")), 
+                 shape = period), position = position_dodge(width = 70000), 
+             size = 4) +
   facet_wrap(~canopy, ncol = 1) +
-  # scale_color_manual(values = c("mediumseagreen", "chocolate2", "slateblue3", "deeppink2")) +
   scale_color_brewer(palette = "Dark2") +
   labs(x = "Date",
        y = expression(paste(Psi, " (MPa)")),
@@ -151,10 +159,12 @@ wp_sum |>
 # Looking at MD/PD over time
 wp_PDMD |> 
   ggplot() +
-  geom_abline(aes(slope = 1, intercept = 0), linetype = "dashed", linewidth = 1) +
+  geom_abline(aes(slope = 1, intercept = 0), 
+              linetype = "dashed", linewidth = 1) +
   # geom_errorbar(aes(x = PD_m, ymin = MD_m - MD_sd, ymax = MD_m + MD_sd, color = date), alpha = 0.7, width = 0.05) +
   # geom_errorbar(aes(y = MD_m, xmin = PD_m - PD_sd, xmax = PD_m + PD_sd, color = date), alpha = 0.7, width = 0.05) +
-  geom_point(aes(x = PD_m, y = MD_m, color = date, shape = canopy), size = 2.5) +
+  geom_point(aes(x = PD_m, y = MD_m, color = date, shape = canopy), 
+             size = 2.5) +
   scale_x_continuous(limits = c(-3, 0)) +
   scale_y_continuous(limits = c(-3, 0)) +
   scale_color_viridis_c(option = "turbo", trans = "date") +
@@ -229,22 +239,42 @@ hydroscape_area_3 # Area of level 3 points
 # By canopy level
 wp_PDMD |> 
   ggplot() +
-  annotate("text", x = -2, y = -0.25, label = paste("Upper slope: ", round(regress_u$coefficients[2], 2)), size = 4.5, color = "tomato") +
-  annotate("text", x = -2, y = -0.5, label = paste("Lower slope: ", round(regress_l$coefficients[2], 2)), size = 4.5, color = "skyblue2") +
-  annotate("text", x = -2, y = -0.75, label = paste("Upper area: ", round(hydroscape_area_u, 2)), size = 4.5, color = "tomato") +
-  annotate("text", x = -2, y = -1, label = paste("Lower area: ", round(hydroscape_area_l, 2)), size = 4.5, color = "skyblue2") +
-  geom_abline(aes(slope = 1, intercept = 0), linetype = "dashed", linewidth = 1) +
-  geom_abline(aes(slope = regress_l$coefficients[2], intercept = regress_l$coefficients[1]), color = "skyblue2") +
-  geom_abline(aes(slope = regress_u$coefficients[2], intercept = regress_u$coefficients[1]), color = "tomato") +
-  geom_polygon(data = hydroscape_canopy, aes(x = PD_m, y = MD_m, fill = canopy), alpha = 0.2) +  # fill = canopy
-  geom_errorbar(aes(x = PD_m, ymin = MD_m - MD_sd, ymax = MD_m + MD_sd, color = canopy), alpha = 0.5, width = 0.05) +
-  geom_errorbar(aes(y = MD_m, xmin = PD_m - PD_sd, xmax = PD_m + PD_sd, color = canopy), alpha = 0.5, width = 0.05) +
-  geom_point(aes(x = PD_m, y = MD_m, color = canopy, shape = canopy), size = 2.5) +
+  annotate("text", x = -2, y = -0.25, 
+           label = paste("Upper slope: ", round(regress_u$coefficients[2], 2)), 
+           size = 4.5, color = "tomato") +
+  annotate("text", x = -2, y = -0.5, 
+           label = paste("Lower slope: ", round(regress_l$coefficients[2], 2)), 
+           size = 4.5, color = "skyblue2") +
+  annotate("text", x = -2, y = -0.75, 
+           label = paste("Upper area: ", round(hydroscape_area_u, 2)), 
+           size = 4.5, color = "tomato") +
+  annotate("text", x = -2, y = -1, 
+           label = paste("Lower area: ", round(hydroscape_area_l, 2)), 
+           size = 4.5, color = "skyblue2") +
+  geom_abline(aes(slope = 1, intercept = 0), 
+              linetype = "dashed", linewidth = 1) +
+  geom_abline(aes(slope = regress_l$coefficients[2], 
+                  intercept = regress_l$coefficients[1]), 
+              color = "skyblue2") +
+  geom_abline(aes(slope = regress_u$coefficients[2], 
+                  intercept = regress_u$coefficients[1]), 
+              color = "tomato") +
+  geom_polygon(data = hydroscape_canopy, 
+               aes(x = PD_m, y = MD_m, fill = canopy), 
+               alpha = 0.2) +  # fill = canopy
+  geom_errorbar(aes(x = PD_m, ymin = MD_m - MD_sd, ymax = MD_m + MD_sd, 
+                    color = canopy), alpha = 0.5, width = 0.05) +
+  geom_errorbar(aes(y = MD_m, xmin = PD_m - PD_sd, xmax = PD_m + PD_sd, 
+                    color = canopy), alpha = 0.5, width = 0.05) +
+  geom_point(aes(x = PD_m, y = MD_m, color = canopy, shape = canopy), 
+             size = 2.5) +
   scale_x_continuous(limits = c(-3, 0)) +
   scale_y_continuous(limits = c(-3, 0)) +
   scale_color_manual(values = c("skyblue2", "tomato")) +
   scale_fill_manual(values = c("skyblue2", "tomato")) +
-  labs(x = expression(paste(Psi[PD])), y = expression(paste(Psi[MD])), fill = "Canopy level", shape = "Canopy level", color = "Elevation") +
+  labs(x = expression(paste(Psi[PD])), 
+       y = expression(paste(Psi[MD])), 
+       fill = "Canopy level", shape = "Canopy level", color = "Elevation") +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),
         axis.text = element_text(size = 13),
@@ -255,22 +285,40 @@ wp_PDMD |>
 # By rainforest level (elevation)
 wp_PDMD |> 
   ggplot() +
-  annotate("text", x = -2, y = -0.25, label = paste("2nd level slope: ", round(regress_2$coefficients[2], 2)), size = 4.5, color = "mediumseagreen") +
-  annotate("text", x = -2, y = -0.5, label = paste("3rd level slope: ", round(regress_3$coefficients[2], 2)), size = 4.5, color = "orchid3") +
-  annotate("text", x = -2, y = -0.75, label = paste("2nd level area: ", round(hydroscape_area_2, 2)), size = 4.5, color = "mediumseagreen") +
-  annotate("text", x = -2, y = -1, label = paste("3rd level area: ", round(hydroscape_area_3, 2)), size = 4.5, color = "orchid3") +
-  geom_abline(aes(slope = 1, intercept = 0), linetype = "dashed", linewidth = 1) +
-  geom_abline(aes(slope = regress_3$coefficients[2], intercept = regress_3$coefficients[1]), color = "orchid3") +
-  geom_abline(aes(slope = regress_2$coefficients[2], intercept = regress_2$coefficients[1]), color = "seagreen") +
-  geom_polygon(data = hydroscape_level, aes(x = PD_m, y = MD_m, fill = factor(level)), alpha = 0.2) +  # fill = canopy
-  geom_errorbar(aes(x = PD_m, ymin = MD_m - MD_sd, ymax = MD_m + MD_sd, color = factor(level)), alpha = 0.5, width = 0.05) +
-  geom_errorbar(aes(y = MD_m, xmin = PD_m - PD_sd, xmax = PD_m + PD_sd, color = factor(level)), alpha = 0.5, width = 0.05) +
-  geom_point(aes(x = PD_m, y = MD_m, color = factor(level), shape = canopy), size = 2.5) +
+  annotate("text", x = -2, y = -0.25, 
+           label = paste("2nd level slope: ", round(regress_2$coefficients[2], 2)), 
+           size = 4.5, color = "mediumseagreen") +
+  annotate("text", x = -2, y = -0.5, 
+           label = paste("3rd level slope: ", round(regress_3$coefficients[2], 2)), 
+           size = 4.5, color = "darkgoldenrod") +
+  annotate("text", x = -2, y = -0.75, 
+           label = paste("2nd level area: ", round(hydroscape_area_2, 2)), 
+           size = 4.5, color = "mediumseagreen") +
+  annotate("text", x = -2, y = -1, 
+           label = paste("3rd level area: ", round(hydroscape_area_3, 2)), 
+           size = 4.5, color = "darkgoldenrod") +
+  geom_abline(aes(slope = 1, intercept = 0), 
+              linetype = "dashed", linewidth = 1) +
+  geom_abline(aes(slope = regress_3$coefficients[2], 
+                  intercept = regress_3$coefficients[1]), 
+              color = "darkgoldenrod") +
+  geom_abline(aes(slope = regress_2$coefficients[2], 
+                  intercept = regress_2$coefficients[1]), 
+              color = "seagreen") +
+  geom_polygon(data = hydroscape_level, 
+               aes(x = PD_m, y = MD_m, fill = factor(level)), alpha = 0.2) +  # fill = canopy
+  geom_errorbar(aes(x = PD_m, ymin = MD_m - MD_sd, ymax = MD_m + MD_sd, 
+                    color = factor(level)), alpha = 0.5, width = 0.05) +
+  geom_errorbar(aes(y = MD_m, xmin = PD_m - PD_sd, xmax = PD_m + PD_sd, 
+                    color = factor(level)), alpha = 0.5, width = 0.05) +
+  geom_point(aes(x = PD_m, y = MD_m, color = factor(level), shape = canopy), 
+             size = 2.5) +
   scale_x_continuous(limits = c(-3, 0)) +
   scale_y_continuous(limits = c(-3, 0)) +
-  scale_color_manual(values = c("mediumseagreen", "orchid3")) +
-  scale_fill_manual(values = c("mediumseagreen", "orchid3")) +
-  labs(x = expression(paste(Psi[PD])), y = expression(paste(Psi[MD])), fill = "Elevation", shape = "Canopy level", color = "Elevation") +
+  scale_color_manual(values = c("mediumseagreen", "darkgoldenrod")) +
+  scale_fill_manual(values = c("mediumseagreen", "darkgoldenrod")) +
+  labs(x = expression(paste(Psi[PD])), y = expression(paste(Psi[MD])), 
+       fill = "Elevation", shape = "Canopy level", color = "Elevation") +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),
         axis.text = element_text(size = 13),
@@ -290,9 +338,13 @@ wp_super_sum <- wp_sum |>
             n = n()) |> ungroup()
 
 wp_super_sum |> 
-  ggplot(aes(x = factor(condition, levels = c("predrought", "drought", "recovery")), y = wp.m, group = interaction(canopy, period, condition), color = interaction(period, canopy))) +
+  ggplot(aes(x = factor(condition, 
+                        levels = c("predrought", "drought", "recovery")), 
+             y = wp.m, group = interaction(canopy, period, condition), 
+             color = interaction(period, canopy))) +
   geom_boxplot() +
-  labs(x = "Condition", y = expression(paste(Psi, " (MPa)")), color = "Period, Canopy level") +
+  labs(x = "Condition", y = expression(paste(Psi, " (MPa)")), 
+       color = "Period, Canopy level") +
   scale_color_manual(values = c("tomato", "plum3", "skyblue2", "khaki3")) +
   theme(panel.grid = element_blank())
 
