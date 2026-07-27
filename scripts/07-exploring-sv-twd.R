@@ -51,7 +51,7 @@ lambdas |>
   ggplot(aes(x = lambda_twd, y = lambda_sv)) +
   geom_abline(aes(slope = puny_lm$coefficients[2], intercept = puny_lm$coefficients[1]), color = "gray50") +
   geom_point(aes(color = Tree_ID_location), size = 4) +
-  scale_x_continuous(limits = c(0.415, 0.412)) +
+  # scale_x_continuous(limits = c(0.415, 0.412)) +
   labs(x = expression(paste("|", lambda, TWD[pd], "|")), y = expression(paste(lambda, SV["5,norm"]))) +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),

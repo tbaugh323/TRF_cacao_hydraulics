@@ -74,7 +74,7 @@ all_dendros |>
   # geom_line(aes(x = datetime, y = VPD * 4), color = "forestgreen", alpha = 0.5) +
   geom_point(aes(x = datetime, y = twd_norm), color = "gray60", size = 0.6) +
   geom_point(aes(x = date, y = twd_min), color = "salmon") +
-  scale_y_continuous(sec.axis = sec_axis(~./4, "vpd")) +
+  # scale_y_continuous(sec.axis = sec_axis(~./4, "vpd")) +
   facet_wrap(~ Tree_ID) +
   theme(panel.grid = element_blank())
 

@@ -42,11 +42,13 @@ dendro_wp_lms <- dendro_wp_lms |> filter(!is.na(Tree_ID)) |>
   rename(lambda_twd = slope)
 
 dendro_wp |> 
+  mutate(condition = case_when(condition == "drought" ~ "Drought",
+                               condition == "predrought" ~ "Predrought",
+                               condition == "recovery" ~ "Recovery")) |>
   ggplot(aes(x = PD_m, y = twd_min)) +
-  # geom_errorbar(aes(xmin = MD_m - MD_sd, xmax = MD_m + MD_sd)) +
   geom_abline(data = dendro_wp_lms, aes(slope = lambda_twd, intercept = intercept)) +
-  geom_point(aes(color = condition), size = 4) + # aes(color = date)
-  # scale_color_viridis_c(option = "turbo", trans = "date") +
+  geom_point(aes(color = factor(condition, levels = c("Predrought", "Drought", "Recovery"))), size = 3) + # aes(color = date)
+  scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
   facet_wrap(~ Tree_ID) +
   labs(x = expression(paste(Psi[PD])), y = expression(paste(TWD[min])),
        color = "Condition") +
@@ -71,8 +73,12 @@ dendro_wp |>
   facet_wrap(~ Tree_ID)
 
 dendro_wp |> 
+  mutate(condition = case_when(condition == "drought" ~ "Drought",
+                               condition == "predrought" ~ "Predrought",
+                               condition == "recovery" ~ "Recovery")) |>
   ggplot(aes(x = twd_min, y = PD_m)) +
-  geom_point(aes(color = condition, shape = Tree_ID), size = 4) +
+  geom_point(aes(color = factor(condition, levels = c("Predrought", "Drought", "Recovery")), shape = Tree_ID), size = 4) +
+  scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
   labs(x = expression(paste(TWD[PD])), y = expression(paste(Psi[PD])), color = "Condition") +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),
@@ -125,18 +131,24 @@ intercept1 <- -0.40993
 intercept2 <- 3.01570
 
 dendro_wp |> 
+  mutate(condition = case_when(condition == "drought" ~ "Drought",
+                               condition == "predrought" ~ "Predrought",
+                               condition == "recovery" ~ "Recovery")) |> 
   ggplot(aes(x = twd_min, y = PD_m)) + 
+  ggtitle("Segmented linear regression") +
   annotate(geom = "segment", x = 0, y = intercept1, xend = changepoint, yend = (slope1 * changepoint) + intercept1) +
   annotate(geom = "segment", x = changepoint, y = (slope1 * changepoint) + intercept1, xend = 0.8, yend = 0.8 * slope2 + intercept2) +
   # geom_segment(aes(x = 0, y = intercept1, xend = changepoint, yend = (slope1 * changepoint) + intercept1)) +
   # geom_segment(aes(x = changepoint, y = (slope1 * changepoint) + intercept1, xend = 4, yend = 4 * slope2 + intercept2)) +
-  geom_point(aes(color = condition, shape = Tree_ID), size = 4) +
+  geom_point(aes(color = factor(condition, levels = c("Predrought", "Drought", "Recovery")), shape = Tree_ID), size = 4) +
+  scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
   labs(x = expression(paste(TWD[PD])), y = expression(paste(Psi[PD])), color = "Condition") +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),
         axis.text = element_text(size = 13),
         legend.title = element_text(size = 15),
-        legend.text = element_text(size = 13))
+        legend.text = element_text(size = 13),
+        title = element_text(size = 13))
 
 dendro_wp |> 
   ggplot(aes(x = PD_m, y = twd_min)) + 
@@ -166,12 +178,21 @@ fit <- nls(y ~ a * exp(b * x),
            control = nls.control(maxiter = 1000))
 summary(fit)
 
-ggplot(data.frame(x, y), aes(x, y)) +
-  geom_point() +
-  geom_line(aes(x, predict(fit, newdata = data.frame(x)))) +
+ggplot() +
+  geom_line(data = data.frame(x, y), aes(x, predict(fit, newdata = data.frame(x)))) +
+  geom_point(data = dendro_wp |> mutate(condition = case_when(condition == "drought" ~ "Drought",
+                                                          condition == "predrought" ~ "Predrought",
+                                                          condition == "recovery" ~ "Recovery")),
+             aes(x = twd_min, y = PD_m, color = factor(condition, levels = c("Predrought", "Drought", "Recovery")), shape = Tree_ID), size = 4) +
   ggtitle("Exponential Regression") +
-  xlab("x") +
-  ylab("y")
+  scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
+  labs(x = expression(paste(TWD[min])), y = expression(paste(Psi[PD])), color = "Condition") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13),
+        title = element_text(size = 13))
 
 # Sigmoidal regression doesn't look super good :(
 start_values <- c(A = -2, b = 5, c = -0.4)
@@ -180,12 +201,21 @@ fit <- nlsLM(y ~ A / (1 + exp(-b * (x + c))),
            control = nls.control(maxiter = 1000, minFactor = 0.0001))
 summary(fit)
 
-ggplot(data.frame(x, y), aes(x, y)) +
-  geom_point() +
-  geom_line(aes(x, predict(fit, newdata = data.frame(x)))) +
+ggplot() +
+  geom_line(data = data.frame(x, y), aes(x, predict(fit, newdata = data.frame(x)))) +
+  geom_point(data = dendro_wp |> mutate(condition = case_when(condition == "drought" ~ "Drought",
+                                                              condition == "predrought" ~ "Predrought",
+                                                              condition == "recovery" ~ "Recovery")), 
+             aes(x = twd_min, y = PD_m, color = condition, shape = Tree_ID), size = 4) +
   ggtitle("Sigmoidal Regression") +
-  xlab("x") +
-  ylab("y")
+  scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
+  labs(x = expression(paste(TWD[min])), y = expression(paste(Psi[PD])), color = "Condition") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13),
+        title = element_text(size = 13))
 
 # Quadratic regression
 df <- data.frame(x, y)
@@ -193,24 +223,57 @@ fit <- lm(y ~ poly(x, 2), data = df)
 summary(fit)
 
 ggplot(df, aes(x, y)) +
-  geom_point() +
-  geom_line(aes(x, predict(fit, newdata = data.frame(x)))) +
-  ggtitle("Quadratic Regression")
+  geom_line(data = data.frame(x, y), aes(x, predict(fit, newdata = data.frame(x)))) +
+  geom_point(data = dendro_wp |> mutate(condition = case_when(condition == "drought" ~ "Drought",
+                                                              condition == "predrought" ~ "Predrought",
+                                                              condition == "recovery" ~ "Recovery")), 
+             aes(x = twd_min, y = PD_m, color = condition, shape = Tree_ID), size = 4) +
+  scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
+  ggtitle("Quadratic Regression") +
+  labs(x = expression(paste(TWD[min])), y = expression(paste(Psi[PD])), color = "Condition") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13),
+        title = element_text(size = 13))
 
 # Cubic regression
 fit <- lm(y ~ poly(x, 3), data = df)
 summary(fit)
 
-ggplot(df, aes(x, y)) +
-  geom_point() +
-  geom_line(aes(x, predict(fit, newdata = data.frame(x)))) +
-  ggtitle("Cubic Regression")
+ggplot() +
+  geom_line(data = data.frame(x, y), aes(x, predict(fit, newdata = data.frame(x)))) +
+  geom_point(data = dendro_wp |> mutate(condition = case_when(condition == "drought" ~ "Drought",
+                                                              condition == "predrought" ~ "Predrought",
+                                                              condition == "recovery" ~ "Recovery")), 
+             aes(x = twd_min, y = PD_m, color = condition, shape = Tree_ID), size = 4) +
+  scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
+  ggtitle("Cubic Regression") +
+  labs(x = expression(paste(TWD[min])), y = expression(paste(Psi[PD])), color = "Condition") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13),
+        title = element_text(size = 13))
 
 # x^4 regression
 fit <- lm(y ~ poly(x, 2), data = df)
 summary(fit)
 
-ggplot(df, aes(x, y)) +
-  geom_point() +
-  geom_line(aes(x, predict(fit, newdata = data.frame(x)))) +
-  ggtitle("x^4 Regression")
+ggplot() +
+  geom_line(data = data.frame(x, y), aes(x, predict(fit, newdata = data.frame(x)))) +
+  geom_point(data = dendro_wp |> mutate(condition = case_when(condition == "drought" ~ "Drought",
+                                                              condition == "predrought" ~ "Predrought",
+                                                              condition == "recovery" ~ "Recovery")), 
+             aes(x = twd_min, y = PD_m, color = condition, shape = Tree_ID), size = 4) +
+  scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
+  ggtitle("x^4 Regression") +
+  labs(x = expression(paste(TWD[min])), y = expression(paste(Psi[PD])), color = "Condition") +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 13),
+        title = element_text(size = 13))
