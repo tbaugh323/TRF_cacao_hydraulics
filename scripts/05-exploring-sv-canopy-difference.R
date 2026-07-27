@@ -3,6 +3,7 @@ library(tidyverse)
 library(patchwork)
 library(cowplot)
 library(dygraphs)
+library(segmented)
 theme_set(theme_bw())
 
 #### Reading ####
@@ -41,7 +42,7 @@ sv_wp |>
   geom_point(aes(x = dt, y = VhrmHRM5_M), color = "forestgreen") +
   geom_point(aes(x = dt, y = wp_m * 8, color = period), size = 2, alpha = 0.7) +
   scale_color_manual(values = c("orchid3", "chocolate1")) +
-  scale_y_continuous("Sap flow velocity at 5 cm",
+  scale_y_continuous("Sap flow velocity at 5 mm (cm/hr)",
                      sec.axis = sec_axis(~ . / 8, name = expression(paste(Psi)),
                                          breaks = seq(0, -3.5, -0.5))) +
   theme(panel.grid = element_blank())
@@ -53,11 +54,11 @@ first <- sv_wp |>
 # geom_line(aes(group = interaction(period)), alpha = 0.5) +
   geom_point(aes(color = period, shape = period), size = 4) +
   scale_color_manual(values = c("orchid3", "chocolate1")) +
-  labs(x = "East Branch Sap flow velocity at 5 cm",
+  labs(x = "East Branch Sap flow velocity at 5 mm (cm/hr)",
        y = expression(paste(Psi)),
        color = "Period", shape = "Period") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 15),
+        axis.title = element_text(size = 13),
         axis.text = element_text(size = 13),
         legend.title = element_text(size = 15),
         legend.text = element_text(size = 13),
@@ -71,11 +72,11 @@ second <- sv_wp |>
   geom_point(aes(color = period, shape = period), size = 4) +
   scale_color_manual(values = c("orchid3", "chocolate1")) +
   # scale_color_viridis_c(option = "turbo", trans = "date") +
-  labs(x = "Low Branch Sap flow velocity at 5 cm",
+  labs(x = "Low Branch Sap flow velocity at 5 mm (cm/hr)",
        y = expression(paste(Psi)),
        color = "Period", shape = "Period") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 15),
+        axis.title = element_text(size = 13),
         axis.text = element_text(size = 13),
         legend.title = element_text(size = 15),
         legend.text = element_text(size = 13),
@@ -86,7 +87,7 @@ first / second
 # yeah we're regressing it
 sv_wp_upper <- sv_wp |> filter(canopy == "Upper canopy")
 linreg_u <- lm(wp_m ~ VhrmHRM5_LB, data = sv_wp_upper)
-segreg_u <- segmented(linreg_u, psi = 0)
+segreg_u <- segmented(linreg_u, psi = 0.5)
 summary(segreg_u)
 # Breakpoint: 5.785
 # Confint: (3.13611, 8.4329)
@@ -104,7 +105,7 @@ intercept2_u <- 8.6912
 
 sv_wp_lower <- sv_wp |> filter(canopy == "Lower canopy")
 linreg_l <- lm(wp_m ~ VhrmHRM5_LB, data = sv_wp_lower)
-segreg_l <- segmented(linreg_l, psi = 0)
+segreg_l <- segmented(linreg_l)
 summary(segreg_l)
 # Breakpoint: 1.063
 # Confint: (-0.814759, 2.9405)
@@ -130,45 +131,5 @@ fourth <- second +
 
 first / fourth
 
-#### Finding overlap with manual stomatal conductance data ####
 
-# gs_list <- unique(all_licor600$Date)
-# sv_list <- unique(R1171$Date)
-# overlap_list <- gs_list[gs_list %in% sv_list]
-# 
-# R1171_small <- R1171 |> filter(Date %in% overlap_list) |> 
-#   rename(dt = Datetime) |> 
-#   dplyr::select(dt, location, VhrmHRM5, VhrmHRM15, VhrmHRM25, VhrmHRM35) |> 
-#   pivot_wider(names_from = location,
-#               values_from = c(VhrmHRM5, VhrmHRM15, VhrmHRM25, VhrmHRM35))
-# gs_small <- all_licor600 |> filter(Date %in% overlap_list) |> 
-#   filter(configAuthor == "LI-COR Default") |> 
-#   mutate(dt = round_date(dt, unit = "30 minutes"))
-# 
-# sv_gs <- full_join(R1171_small, gs_small, by = "dt")
-# 
-# sv_gs |> 
-#   ggplot() +
-#   geom_line(aes(x = dt, y = VhrmHRM5_M), color = "forestgreen") +
-#   geom_point(aes(x = dt, y = VhrmHRM5_M), color = "forestgreen") +
-#   geom_point(aes(x = dt, y = gsw * 30), color = "chocolate1") +
-#   scale_y_continuous("Sap flow velocity at 5 cm",
-#                      sec.axis = sec_axis(~ . * 0.3, name = expression(paste(g[s], " (mol ", m^-2, s^-1, ")")))) +
-#   theme(panel.grid = element_blank())
-# 
-# first <- sv_gs |> 
-#   filter(canopy == "lower") |> 
-#   ggplot(aes(x = VhrmHRM5_LB, y = gsw)) +
-#   geom_point(aes(color = Date)) +
-#   scale_color_viridis_c(option = "turbo", trans = "date") +
-#   theme(panel.grid = element_blank())
-# 
-# second <- sv_gs |> 
-#   filter(canopy == "upper") |> 
-#   ggplot(aes(x = VhrmHRM5_EB, y = gsw)) +
-#   geom_point(aes(color = Date)) +
-#   scale_color_viridis_c(option = "turbo", trans = "date") +
-#   theme(panel.grid = element_blank())
-# 
-# second / first
-# 
+
