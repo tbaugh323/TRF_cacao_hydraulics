@@ -155,4 +155,5 @@ rects_drought$date_start[1] <- -Inf
 write_csv(clean_all_data, "data/licor600_data/clean_all_licor600.csv")
 write_csv(sum_by_individual, "data/licor600_data/licor600_by_individual.csv")
 write_csv(sum_by_canopy, "data/licor600_data/licor600_by_canopy.csv")
+write_csv(deltas, "data/licor600_data/deltas.csv")
 
