@@ -95,17 +95,28 @@ sum_by_canopy <- clean_all_data |>
 
 deltas <- sum_by_canopy |> 
   dplyr::select(instrument, Date, canopy, period, gsw_var, gsw_m) |> 
-  filter(period != "afternoon", gsw_var == "gsw_raw_m") |> dplyr::select(-gsw_var) |> 
+  filter(period != "afternoon", gsw_var == "gsw_raw_m") |> 
+  dplyr::select(-gsw_var) |> 
   pivot_wider(names_from = period, values_from = gsw_m) |> 
   mutate(delta1 = morning - early,
          delta2 = midday - morning)
 
 # Marking rain events
-rain_df <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06-30", "2026-07-16", "2026-07-21", "2026-07-23"))),
+rain_df <- data.frame(date = c(as.Date(c("2026-06-23",
+                                         "2026-06-25",
+                                         "2026-06-30",
+                                         "2026-07-16",
+                                         "2026-07-21",
+                                         "2026-07-23"))),
                       time = c(rep("00:00:00", 6))) |> 
   mutate(dt = as.POSIXct(paste(date, time)))
 
-rects_rain <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06-30", "2026-07-16", "2026-07-21", "2026-07-23"))),
+rects_rain <- data.frame(date = c(as.Date(c("2026-06-23",
+                                            "2026-06-25",
+                                            "2026-06-30",
+                                            "2026-07-16",
+                                            "2026-07-21",
+                                            "2026-07-23"))),
                          time_start = c(rep("00:00:00", 6)),
                          time_end = c(rep("2:00:00", 6))) |> 
   mutate(dt_start = as.POSIXct(paste(date, time_start)),
@@ -114,8 +125,12 @@ rects_rain <- data.frame(date = c(as.Date(c("2026-06-23", "2026-06-25", "2026-06
 
 # Defining drought
 
-rects_drought <- data.frame(date_start = c(as.Date(c("2026-06-22", "2026-07-01", "2026-07-16"))),
-                            date_end = c(as.Date(c("2026-07-01", "2026-07-16", "2026-07-24"))),
+rects_drought <- data.frame(date_start = c(as.Date(c("2026-06-22", 
+                                                     "2026-07-01", 
+                                                     "2026-07-16"))),
+                            date_end = c(as.Date(c("2026-07-01", 
+                                                   "2026-07-16", 
+                                                   "2026-07-24"))),
                             period = c("predrought", "drought", "recovery"))
 rects_drought$date_end[3] <- Inf
 rects_drought$date_start[1] <- -Inf

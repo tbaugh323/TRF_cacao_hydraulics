@@ -82,7 +82,7 @@ clean_all_data |>
   ggplot(aes(x = Time, y = gsw)) +
   geom_hline(aes(yintercept = 0), linetype = "dotted", linewidth = 1, color = "gray50") +
   geom_point(aes(color = Date), size = 2) +
-  scale_color_viridis_c(option = "turbo", trans = "date") +
+  scale_color_viridis_c(option = "viridis", trans = "date") +
   facet_wrap(~ condition) +
   labs(y = expression(paste(g[s], " (mol ", m^-2, s^-1, ")"))) +
   theme(panel.grid = element_blank(),
