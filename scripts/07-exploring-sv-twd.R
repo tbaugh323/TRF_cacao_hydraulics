@@ -1,4 +1,4 @@
-#### Looking at how WP is related to SV ####
+#### Looking at how TWD is related to SV (fig 5 of Peters et al.) ####
 library(tidyverse)
 theme_set(theme_bw())
 

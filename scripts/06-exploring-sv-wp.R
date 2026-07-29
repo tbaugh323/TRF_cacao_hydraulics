@@ -7,7 +7,7 @@ wp_PDMD_long <- read_csv("data/water_potential/wp_PDMD_long.csv") |>
   mutate(Tree_ID = case_when(individual == 1 ~ "BioR1192",
                              individual == 2 ~ "BioR1171",
                              individual == 3 ~ "BioR1170",
-                             individual == 4 ~ "BioR1192"),
+                             individual == 4 ~ "BioR1191"),
          Tree_ID = case_when(individual == 2 & canopy == "Upper canopy" ~ paste0(Tree_ID, "_EB"),
                              individual == 2 & canopy == "Lower canopy" ~ paste0(Tree_ID, "_LB"),
                              TRUE ~ Tree_ID))
@@ -16,26 +16,29 @@ R1171 <- read_csv("data/sap_flow/raw_sapflow/R1171-postprocess.csv") |>
   mutate(Datetime = as.POSIXct(Datetime, tz = "America/Phoenix")) |> 
   rename(date = Date) |> 
   mutate(Tree_ID = paste0(Tree_ID, "_", location)) |> 
-  dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
+  dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
+                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
 
 R1132 <- read_csv("data/sap_flow/raw_sapflow/R1132-postprocess.csv") |> 
   mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
   mutate(date = as.Date(Datetime),
          TreeID = "BioR1132") |> 
   rename(Tree_ID = TreeID) |> 
-  dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
+  dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
+                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
 
 R1192 <- read_csv("data/sap_flow/raw_sapflow/R1192B-postprocess.csv") |> 
   mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
   mutate(date = as.Date(Datetime),
          TreeID = "BioR1192") |> 
   rename(Tree_ID = TreeID) |> 
-  dplyr::select(Datetime, date, , Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
+  dplyr::select(Datetime, date, , Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
+                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
 
-# Writing this out
+# Writing this out IN LOCAL TIME
 sv_all <- rbind(R1171, R1132, R1192) |> 
   rename(dt = Datetime)
-# Writing out IN LOCAL TIME
+
 write_csv(sv_all, "data/sap_flow/sv_all.csv")
 
 #### Joining ####
@@ -73,7 +76,9 @@ for (i in 1:length(unique(sv_wp_full$Tree_ID))) {
 #### Exploring ####
 
 sv_wp_fuller |> 
-  filter(Tree_ID == "BioR1171_EB" | Tree_ID == "BioR1171_LB" | Tree_ID == "BioR1192") |> 
+  filter(Tree_ID == "BioR1171_EB" |
+           Tree_ID == "BioR1171_LB" |
+           Tree_ID == "BioR1192") |> 
   ggplot(aes(x = dt, y = wp_m)) +
   geom_line(aes(x = dt, y = VhrmHRM5_norm, group = date), color = "forestgreen") +
   geom_point(aes(x = dt, y = VhrmHRM5_norm), color = "forestgreen") +
@@ -86,7 +91,9 @@ sv_wp_fuller |>
   facet_wrap(~ Tree_ID)
 
 sv_wp_fuller |> 
-  filter(Tree_ID == "BioR1171_EB" | Tree_ID == "BioR1171_LB" | Tree_ID == "BioR1192",
+  filter(Tree_ID == "BioR1171_EB" |
+           Tree_ID == "BioR1171_LB" |
+           Tree_ID == "BioR1192",
          !is.na(period)) |> 
   ggplot(aes(y = VhrmHRM5_norm, x = wp_m)) +
   geom_point(aes(color = period, shape = period), size = 4) +
@@ -100,7 +107,9 @@ sv_wp_fuller |>
         plot.title = element_text(size = 15))
 
 sv_wp_works <- sv_wp_fuller |> 
-  filter(Tree_ID == "BioR1171_EB" | Tree_ID == "BioR1171_LB" | Tree_ID == "BioR1192") |> 
+  filter(Tree_ID == "BioR1171_EB" | 
+           Tree_ID == "BioR1171_LB" | 
+           Tree_ID == "BioR1192") |> 
   filter(period == "MD")
 
 # doing slopes
@@ -112,25 +121,42 @@ for (i in 1:length(unique(sv_wp_works$Tree_ID))) {
   current_lm <- lm(current_tree$VhrmHRM5_norm ~ current_tree$wp_m)
   
   sv_wp_lms <- sv_wp_lms |> 
-    add_row(Tree_ID = unique(sv_wp_works$Tree_ID)[i], slope = current_lm$coefficients[2], intercept = current_lm$coefficients[1], r2 = summary(current_lm)$r.squared)
+    add_row(Tree_ID = unique(sv_wp_works$Tree_ID)[i], 
+            slope = current_lm$coefficients[2], 
+            intercept = current_lm$coefficients[1], 
+            r2 = summary(current_lm)$r.squared)
 }
 sv_wp_lms <- sv_wp_lms |> filter(!is.na(Tree_ID)) |> 
   rename(lambda_sv = slope)
 
 sv_wp_fuller |> 
-  filter(Tree_ID == "BioR1171_EB" | Tree_ID == "BioR1171_LB" | Tree_ID == "BioR1192",
+  filter(Tree_ID == "BioR1171_EB" |
+           Tree_ID == "BioR1171_LB" |
+           Tree_ID == "BioR1192",
          !is.na(period)) |> 
+  filter(Tree_ID != "BioR1192") |> 
+  mutate(Tree_ID = case_when(Tree_ID == "BioR1171_EB" ~ "Upper canopy",
+                             Tree_ID == "BioR1171_LB" ~ "Lower canopy")) |> 
   ggplot(aes(y = VhrmHRM5_norm, x = wp_m)) +
-  geom_abline(data = sv_wp_lms, aes(slope = lambda_sv, intercept = intercept), color = "orchid3") +
-  geom_point(aes(color = period, shape = period), size = 4) +
+  geom_abline(data = sv_wp_lms |> 
+                filter(Tree_ID != "BioR1192") |> 
+                mutate(Tree_ID = case_when(Tree_ID == "BioR1171_EB" ~ "Upper canopy",
+                                           Tree_ID == "BioR1171_LB" ~ "Lower canopy")), 
+              aes(slope = lambda_sv, intercept = intercept), color = "orchid3", 
+              linewidth = 1) +
+  geom_point(aes(color = period, shape = period), size = 5) +
   scale_color_manual(values = c("orchid3", "chocolate1")) +
+  labs(x = expression(paste(Psi)), y = expression(paste(V["s,5"], " (cm/hr)")),
+       color = "Period", shape = "Period") +
   facet_wrap(~ Tree_ID) +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 15),
-        axis.text = element_text(size = 13),
-        legend.title = element_text(size = 15),
-        legend.text = element_text(size = 13),
-        plot.title = element_text(size = 15))
+        axis.title = element_text(size = 25),
+        axis.text = element_text(size = 23),
+        legend.title = element_text(size = 25),
+        legend.text = element_text(size = 23),
+        plot.title = element_text(size = 25),
+        strip.text = element_text(size = 23, color = "white"),
+        strip.background = element_rect(fill = "#205A3D"))
 
 # these slopes will act as the λG[c,norm]!
 
