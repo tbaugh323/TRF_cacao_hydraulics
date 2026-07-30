@@ -1,0 +1,4 @@
+date_start,date_end,period
+-Inf,2026-07-01,predrought
+2026-07-01,2026-07-16,drought
+2026-07-16,Inf,recovery

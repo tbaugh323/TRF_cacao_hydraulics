@@ -24,19 +24,19 @@ all_dendros |>
            date == as.Date("2026-07-08") | 
            date == as.Date("2026-07-09") | 
            date == as.Date("2026-07-10")) |> 
-  ggplot(aes(x = VPD, y = twd_norm)) +
-  geom_point(aes(color = datetime)) +
+  ggplot(aes(x = Temperature, y = twd_norm)) +
+  geom_point(aes(color = datetime), size = 4) +
   scale_color_viridis_c(option = "viridis", trans = scales::time_trans()) +
   facet_wrap(~ Tree_ID) +
   labs(x = expression(paste("Temperature (", degree, "C)")), 
        y = expression(paste(TWD[norm])), color = "Date") +
   theme(panel.grid = element_blank(),
-        axis.text = element_text(size = 13),
-        axis.title = element_text(size = 15),
-        legend.text = element_text(size = 13),
-        legend.title = element_text(size = 15),
-        strip.text = element_text(size = 13),
-        strip.background = element_rect(fill = "white"))
+        axis.text = element_text(size = 23),
+        axis.title = element_text(size = 25),
+        legend.text = element_text(size = 23),
+        legend.title = element_text(size = 25),
+        strip.text = element_text(size = 23, color = "white"),
+        strip.background = element_rect(fill = "#205A3D"))
 
 all_dendros |> 
   filter(Tree_ID == "BioR1170" | Tree_ID == "BioR1171") |> 
@@ -44,24 +44,24 @@ all_dendros |>
            date == as.Date("2026-07-16") | 
            date == as.Date("2026-07-17") |
            date == as.Date("2026-07-18")) |> 
-  ggplot(aes(x = VPD, y = twd_norm)) +
-  geom_point(aes(color = datetime)) +
+  ggplot(aes(x = Temperature, y = twd_norm)) +
+  geom_point(aes(color = datetime), size = 4) +
   geom_point(data = all_dendros |> 
                filter(datetime == as.POSIXct("2026-07-16 00:00:00"), 
                       Tree_ID == "BioR1170" | Tree_ID == "BioR1171"), 
-             aes(x = VPD, y = twd_norm), 
-             color = "cornflowerblue", size = 6, alpha = 0.7) +
+             aes(x = Temperature, y = twd_norm), 
+             color = "cornflowerblue", size = 10, alpha = 0.7) +
   scale_color_viridis_c(option = "viridis", trans = scales::time_trans()) +
   facet_wrap(~ Tree_ID) +
   labs(x = expression(paste("Temperature (", degree, "C)")), 
        y = expression(paste(TWD[norm])), color = "Date") +
   theme(panel.grid = element_blank(),
-        axis.text = element_text(size = 13),
-        axis.title = element_text(size = 15),
-        legend.text = element_text(size = 13),
-        legend.title = element_text(size = 15),
-        strip.text = element_text(size = 13),
-        strip.background = element_rect(fill = "white"))
+        axis.text = element_text(size = 23),
+        axis.title = element_text(size = 25),
+        legend.text = element_text(size = 23),
+        legend.title = element_text(size = 25),
+        strip.text = element_text(size = 23, color = "white"),
+        strip.background = element_rect(fill = "#205A3D"))
 
 all_dendros |> 
   filter(Tree_ID == "BioR1170" | Tree_ID == "BioR1171") |> 

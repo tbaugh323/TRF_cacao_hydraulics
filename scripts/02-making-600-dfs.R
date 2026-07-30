@@ -123,6 +123,9 @@ rects_rain <- data.frame(date = c(as.Date(c("2026-06-23",
          dt_end = as.POSIXct(paste(date, time_end)),
          date = as.Date(date))
 
+write_csv(rects_rain, "data/met_data/rects_rain.csv")
+write_csv(rain_df, "data/met_data/rain_df.csv")
+
 # Defining drought
 
 rects_drought <- data.frame(date_start = c(as.Date(c("2026-06-22", 
@@ -134,6 +137,8 @@ rects_drought <- data.frame(date_start = c(as.Date(c("2026-06-22",
                             period = c("predrought", "drought", "recovery"))
 rects_drought$date_end[3] <- Inf
 rects_drought$date_start[1] <- -Inf
+
+write_csv(rects_drought, "data/met_data/rects_drought.csv")
 
 # rects_drought <- rects_drought |> 
 #   filter(period == "drought") |> 
