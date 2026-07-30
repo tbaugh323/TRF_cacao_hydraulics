@@ -43,7 +43,7 @@ den_data <- data.frame(NULL)
 for(q in 1:length(alldata)){
     #input text file
     csv <- paste(alldata[q], ".csv", sep = "")
-    den <- read.csv(paste0("data/dendro_data/raw_dendros", csv), header = T, quote = "", skip = 3)
+    den <- read.csv(paste0("data/dendro_data/raw_dendros/", csv), header = T, quote = "", skip = 3)
     
     ##Fix Name
     name1 <- substr(alldata[q], start = 1, stop = 3)

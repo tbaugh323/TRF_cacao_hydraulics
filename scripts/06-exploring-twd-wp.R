@@ -76,12 +76,6 @@ write_csv(dendro_wp_abs, "data/dendro_data/lambda_twd_min.csv")
 #### Looking at Psi[PD] to TWD[min] patterns (Ziegler stuff) ####
 
 dendro_wp |> 
-  ggplot(aes(x = PD_m, y = twd_min)) +
-  geom_point(aes(color = condition, shape = Tree_ID), size = 4) +
-  xlim(c(0, -2.5)) +
-  facet_wrap(~ Tree_ID)
-
-dendro_wp |> 
   mutate(condition = case_when(condition == "drought" ~ "Drought",
                                condition == "predrought" ~ "Predrought",
                                condition == "recovery" ~ "Recovery")) |>
@@ -90,7 +84,7 @@ dendro_wp |>
                                 levels = c("Predrought", "Drought", "Recovery")), 
                  shape = Tree_ID), size = 4) +
   scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
-  labs(x = expression(paste(TWD[PD])), 
+  labs(x = expression(paste(TWD[min])), 
        y = expression(paste(Psi[PD])), color = "Condition") +
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 15),
@@ -116,17 +110,17 @@ davies.test(result) # there is a segment!
 summary(seg_result)
 
 # Estimated break point
-# twd_min = 3.404
-# R-squared = 0.8604  # pretty good!
+# twd_min = 0.63
+# R-squared = 0.7388  # pretty good!
 # confint(seg_result)
-# (3.32982, 3.47854)
+# (0.583679, 0.676586)
 
 # twd_min
-changepoint <- 0.556385
-slope1 <- -0.11498
-slope2 <- -6.27190
-intercept1 <- -0.40993
-intercept2 <- 3.01570
+changepoint <- 0.6301326
+slope1 <- -0.080879
+slope2 <- -9.069000 
+intercept1 <- -0.41834
+intercept2 <- 5.24540
 
 dendro_wp |> 
   mutate(condition = case_when(condition == "drought" ~ "Drought",
