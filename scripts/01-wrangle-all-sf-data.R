@@ -77,7 +77,8 @@ for (i in 1:length(R1171_raw)) {
   tag <- sub("^.*?_", "", tag)
   
   hold <- read_csv(paste0("data/sap_flow/raw_sapflow/R1171_files/", R1171_raw[i])) |> 
-    mutate(location = tag) |> 
+    mutate(Datetime = as.POSIXct(Datetime, format = "%m/%d/%Y %H:%M"),
+           location = tag) |> 
     relocate(Datetime, location)
   
   R1171_all <- bind_rows(hold, R1171_all)
@@ -91,3 +92,66 @@ R1171_clean <- R1171_all |>
 
 # Writing out IN LOCAL TIME
 write_csv(R1171_clean, "data/sap_flow/raw_sapflow/R1171-all-postprocess.csv")
+
+#### R1170 ####
+
+R1170_files <- list.files("data/sap_flow/raw_sapflow/R1170_files/")
+R1170_raw <- grep("postprocess", R1170_files)
+R1170_raw <- c(R1170_files[grep("postprocess", R1170_files)])
+R1170_all <- data.frame()
+
+for (i in 1:length(R1170_raw)) {
+  
+  # Extracting the label for each sensor
+  id <- R1170_raw[i]
+  tag <- sub("-.*", "", id)
+  
+  hold <- read_csv(paste0("data/sap_flow/raw_sapflow/R1170_files/", R1170_raw[i])) |> 
+    mutate(location = tag) |> 
+    relocate(Datetime, location)
+  
+  R1170_all <- bind_rows(hold, R1170_all)
+}
+
+R1170_clean <- R1170_all |> 
+  mutate(Date = as.Date(Datetime),
+         TreeID = "BioR1170",
+         Datetime = lubridate::force_tz(Datetime, "America/Phoenix")) |> 
+  rename(Tree_ID = TreeID)
+
+# Writing out IN LOCAL TIME
+write_csv(R1132_clean, "data/sap_flow/raw_sapflow/R1170-all-postprocess.csv")
+
+
+#### Merging together ####
+
+R1171 <- read_csv("data/sap_flow/raw_sapflow/R1171-all-postprocess.csv") |> 
+  mutate(Datetime = as.POSIXct(Datetime, tz = "America/Phoenix")) |> 
+  rename(date = Date) |> 
+  mutate(Tree_ID = paste0(Tree_ID, "_", location)) |> 
+  dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
+                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
+
+R1132 <- read_csv("data/sap_flow/raw_sapflow/R1132-all-postprocess.csv") |> 
+  mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
+  mutate(date = as.Date(Datetime)) |> 
+  dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
+                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
+
+R1192 <- read_csv("data/sap_flow/raw_sapflow/R1192-all-postprocess.csv") |> 
+  mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
+  mutate(date = as.Date(Datetime)) |> 
+  dplyr::select(Datetime, date, , Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
+                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
+
+R1170 <- read_csv("data/sap_flow/raw_sapflow/R1170-all-postprocess.csv") |> 
+  mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
+  mutate(date = as.Date(Datetime),) |> 
+  dplyr::select(Datetime, date, , Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
+                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
+
+# Writing this out IN LOCAL TIME
+sv_all <- rbind(R1171, R1132, R1192, R1170) |> 
+  rename(dt = Datetime)
+
+write_csv(sv_all, "data/sap_flow/sv_all.csv")

@@ -6,27 +6,33 @@ theme_set(theme_bw())
 
 trees <- c("BioR1192", "BioR1171", "BioR1170", "BioR1191")
 
+rects_rain <- read_csv("data/met_data/rects_rain.csv")
+
 #### Met subplot ####
 all_met <- read_csv("data/met_data/all_met.csv") |> 
   mutate(DateTime_MST = as.POSIXct(DateTime_MST, tz = "MST"))
 
-all_met |> 
-  ggplot(aes(x = DateTime_MST, y = VPD)) +
-  geom_point(aes(color = TA)) +
+met_timeseries <- all_met |> 
+  mutate(Tree_ID = case_when(Tree_ID == "BioR1171" ~ "Level 3",
+                             Tree_ID == "BioR1192" ~ "Level 2")) |> 
+  ggplot(aes(x = DateTime_MST, y = TA)) +
+  geom_point(aes(color = VPD), size = 1.6) +
   scale_color_viridis_c(option = "rocket") +
-  labs(x = "Date", y = "VPD", 
-       color = expression(paste("Temperature (", degree, "C)"))) +
+  labs(x = "Date", y = expression(paste("Temperature (", degree, "C)")), 
+       color = "VPD") +
   facet_wrap(~ Tree_ID, ncol = 1) +
   theme(panel.grid = element_blank(),
-        axis.text = element_text(size = 13),
-        axis.title = element_text(size = 13),
-        legend.text = element_text(size = 13),
-        legend.title = element_text(size = 15),
-        strip.text = element_text(size = 13, color = "white"),
+        axis.text = element_text(size = 27),
+        axis.title = element_text(size = 31),
+        legend.text = element_text(size = 29),
+        legend.title = element_text(size = 31),
+        strip.text = element_text(size = 27, color = "white"),
         strip.background = element_rect(fill = "#205A3D"))
+
 #### TWD subplot ####
 
 all_dendros <- read_csv("data/dendro_data/all_dendros.csv") |> 
+  mutate(datetime = as.POSIXct(datetime, tzone = "MST")) |> 
   mutate(condition = case_when(date <= as.Date("2026-06-30") ~ "Predrought",
                                date > as.Date("2026-06-30") & date <= as.Date("2026-07-15") ~ "Drought",
                                date > as.Date("2026-07-15") ~ "Recovery"))
@@ -56,6 +62,7 @@ dendro_timeseries <- all_dendros |>
 #### SV subplot ####
 
 sv_all <- read_csv("data/sap_flow/sv_all.csv") |> 
+  mutate(dt = as.POSIXct(dt, tz = "MST")) |> 
   mutate(location = sub(".*?_", "", Tree_ID)) |> 
   mutate(location = case_when(location == "BioR1132" | location == "BioR1192" ~ NA,
                               TRUE ~ location)) |> 
@@ -69,7 +76,8 @@ sv_timeseries <- sv_all |>
   filter(Tree_ID_location != "BioR1171_M",
          Tree_ID_location != "BioR1171_NB",
          Tree_ID_location != "BioR1171_L",
-         Tree_ID_location != "BioR1171_T") |> 
+         Tree_ID_location != "BioR1171_T",
+         Tree_ID_location != "BioR1171_SB") |> 
   ggplot(aes(x = dt, y = VhrmHRM5)) +
   geom_vline(data = rects_rain, aes(xintercept = date),
              linetype = "dashed", linewidth = 1, color = "navy", alpha = 0.6) +
@@ -105,7 +113,8 @@ wp_timeseries <- wp_no_canopy |>
                                 individual == 3 ~ "BioR1170",
                                 individual == 4 ~ "BioR1191")) |> 
   ggplot(aes(x = dt, y = wp_m)) +
-  geom_line(aes(color = factor(individual), group = interaction(individual, period)), linewidth = 1) +
+  geom_line(aes(color = factor(individual), group = interaction(individual, period)), 
+            linewidth = 1) +
   geom_errorbar(aes(ymin = wp_m - wp_sd, ymax = wp_m + wp_sd, color = factor(individual))) +
   geom_point(aes(color = factor(individual), shape = period), size = 4) +
   scale_color_manual(values = c("#7570b3", "#d95f02", "#e7298a", "#1b9e77")) +

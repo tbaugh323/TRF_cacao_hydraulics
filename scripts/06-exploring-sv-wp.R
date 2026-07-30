@@ -10,57 +10,21 @@ wp_PDMD_long <- read_csv("data/water_potential/wp_PDMD_long.csv") |>
                              individual == 4 ~ "BioR1191"),
          Tree_ID = case_when(individual == 2 & canopy == "Upper canopy" ~ paste0(Tree_ID, "_EB"),
                              individual == 2 & canopy == "Lower canopy" ~ paste0(Tree_ID, "_LB"),
-                             TRUE ~ Tree_ID))
+                             TRUE ~ Tree_ID),
+         dt = as.POSIXct(dt, tz = "MST"))
 
-R1171 <- read_csv("data/sap_flow/raw_sapflow/R1171-postprocess.csv") |> 
-  mutate(Datetime = as.POSIXct(Datetime, tz = "America/Phoenix")) |> 
-  rename(date = Date) |> 
-  mutate(Tree_ID = paste0(Tree_ID, "_", location)) |> 
-  dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
-                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
-
-R1132 <- read_csv("data/sap_flow/raw_sapflow/R1132-postprocess.csv") |> 
-  mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
-  mutate(date = as.Date(Datetime),
-         TreeID = "BioR1132") |> 
-  rename(Tree_ID = TreeID) |> 
-  dplyr::select(Datetime, date, Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
-                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
-
-R1192 <- read_csv("data/sap_flow/raw_sapflow/R1192B-postprocess.csv") |> 
-  mutate(Datetime = lubridate::force_tz(Datetime, tzone = "America/Phoenix")) |> 
-  mutate(date = as.Date(Datetime),
-         TreeID = "BioR1192") |> 
-  rename(Tree_ID = TreeID) |> 
-  dplyr::select(Datetime, date, , Tree_ID, VhrmHRM5, VhrmHRM15, VhrmHRM25, 
-                VhrmHRM35, Year, Month, Day, Hour, Minute, Second)
-
-# Writing this out IN LOCAL TIME
-sv_all <- rbind(R1171, R1132, R1192) |> 
-  rename(dt = Datetime)
-
-write_csv(sv_all, "data/sap_flow/sv_all.csv")
+sv_all <- read_csv("data/sap_flow/sv_all.csv") |> 
+  mutate(dt = as.POSIXct(dt, tz = "MST"))
 
 #### Joining ####
 
 wp_list <- unique(wp_PDMD_long$date)
-sv_list <- unique(c(R1171$date, R1132$date, R1192$date))
+sv_list <- unique(sv_all$date)
 overlap_list <- wp_list[wp_list %in% sv_list]
-
-R1171_small <- R1171 |> filter(date %in% overlap_list) |> 
-  rename(dt = Datetime)
-
-R1132_small <- R1132 |> filter(date %in% overlap_list) |> 
-  rename(dt = Datetime)
-
-R1192_small <- R1192 |> filter(date %in% overlap_list) |> 
-  rename(dt = Datetime)
 
 wp_small <- wp_PDMD_long |> filter(date %in% overlap_list)
 
-sv_full <- rbind(R1171_small, R1132_small, R1192_small)
-
-sv_wp_full <- full_join(sv_full, wp_small, by = c("dt", "date", "Tree_ID"))
+sv_wp_full <- full_join(sv_all, wp_small, by = c("dt", "date", "Tree_ID"))
 
 sv_wp_fuller <- data.frame()
 for (i in 1:length(unique(sv_wp_full$Tree_ID))) {
@@ -144,18 +108,18 @@ sv_wp_fuller |>
                                            Tree_ID == "BioR1171_LB" ~ "Lower canopy")), 
               aes(slope = lambda_sv, intercept = intercept), color = "orchid3", 
               linewidth = 1) +
-  geom_point(aes(color = period, shape = period), size = 5) +
+  geom_point(aes(color = period, shape = period), size = 6) +
   scale_color_manual(values = c("orchid3", "chocolate1")) +
   labs(x = expression(paste(Psi)), y = expression(paste(V["s,5"], " (cm/hr)")),
        color = "Period", shape = "Period") +
   facet_wrap(~ Tree_ID) +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 25),
-        axis.text = element_text(size = 23),
-        legend.title = element_text(size = 25),
-        legend.text = element_text(size = 23),
-        plot.title = element_text(size = 25),
-        strip.text = element_text(size = 23, color = "white"),
+        axis.title = element_text(size = 29),
+        axis.text = element_text(size = 27),
+        legend.title = element_text(size = 29),
+        legend.text = element_text(size = 27),
+        plot.title = element_text(size = 29),
+        strip.text = element_text(size = 27, color = "white"),
         strip.background = element_rect(fill = "#205A3D"))
 
 # these slopes will act as the λG[c,norm]!

@@ -2,7 +2,6 @@
 library(tidyverse)
 library(patchwork)
 library(cowplot)
-library(dygraphs)
 library(segmented)
 theme_set(theme_bw())
 
@@ -13,9 +12,11 @@ wp_PDMD_long <- read_csv("data/water_potential/wp_PDMD_long.csv") |>
                              individual == 2 ~ "BioR1171",
                              individual == 3 ~ "BioR1170",
                              individual == 4 ~ "BioR1192"),
-         dt = as.POSIXct(dt, tz = "MST"))
+         dt = as.POSIXct(dt, tz = "MST"),
+         location = case_when(canopy == "Upper canopy" ~ "EB",
+                              canopy == "Lower canopy" ~ "LB"))
 # this one is IN UTC
-R1171 <- read_csv("data/sap_flow/raw_sapflow/R1171-postprocess.csv") |> 
+R1171 <- read_csv("data/sap_flow/raw_sapflow/R1171-all-postprocess.csv") |> 
   rename(date = Date) |> 
   mutate(Datetime = as.POSIXct(Datetime, tz = "MST"),
          date = as.Date(Datetime))
@@ -35,7 +36,7 @@ R1171_small <- R1171 |> filter(date %in% overlap_list) |>
 
 wp_small <- wp_PDMD_long |> filter(date %in% overlap_list, Tree_ID == "BioR1171")
 
-sv_wp <- full_join(R1171_small, wp_small, by = c("dt", "date", "Tree_ID"))
+sv_wp <- full_join(R1171_small, wp_small, by = c("dt", "date", "Tree_ID", "location"))
 
 sv_wp |> 
   ggplot() +
@@ -50,24 +51,25 @@ sv_wp |>
   theme(panel.grid = element_blank())
 
 sv_wp |> 
-  filter(canopy == "Upper canopy") |> 
+  # filter(canopy == "Upper canopy") |>
+  filter(VhrmHRM5 <= 8) |> 
   filter(location == "EB" | location == "LB") |> 
   mutate(location = case_when(location == "EB" ~ "Upper canopy (east branch)",
                               location == "LB" ~ "Lower canopy (lower branch)")) |> 
   ggplot(aes(x = VhrmHRM5, y = wp_m)) +
-  geom_point(aes(color = period, shape = period), size = 5) +
+  geom_point(aes(color = period, shape = period), size = 6) +
   scale_color_manual(values = c("orchid3", "chocolate1")) +
   facet_wrap(~ factor(location, levels = c("Upper canopy (east branch)", "Lower canopy (lower branch)")), ncol = 1) +
-  labs(x = "Sap flow velocity at 5 mm (cm/hr)",
+  labs(x = expression(paste(V["s,5"], " (cm/hr)")),
        y = expression(paste(Psi)),
        color = "Period", shape = "Period") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 23),
-        axis.text = element_text(size = 23),
-        legend.title = element_text(size = 25),
-        legend.text = element_text(size = 23),
-        plot.title = element_text(hjust = 0.5, size = 25),
-        strip.text = element_text(size = 23, color = "white"),
+        axis.title = element_text(size = 29),
+        axis.text = element_text(size = 27),
+        legend.title = element_text(size = 29),
+        legend.text = element_text(size = 27),
+        plot.title = element_text(hjust = 0.5, size = 29),
+        strip.text = element_text(size = 27, color = "white"),
         strip.background = element_rect(fill = "#205A3D"))
 
 # first <- sv_wp |> 
