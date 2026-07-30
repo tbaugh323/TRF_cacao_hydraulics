@@ -8,13 +8,18 @@
 
 03 - initial visualizations of data/looking for patterns in manual data
 
-04 - making "final"" figures for manual data
+04 - making figures for LI600 data
 
 05 - looking at canopy level differences in sap velocity
 
 06 - looking at how water potential and tree-level metrics relate
 
 07 - relating tree level metrics to each other
+
+08 - incorporating atmospheric/meteorological data into ecophys variables
+
+09 - creating time series with met, tree-level, and leaf-level vars (many poster
+figures here)
 
 ### data
 
@@ -53,19 +58,32 @@ machine.
 **licor600_data**/test_data - test data, used when troubleshooting the machine 
 mostly.
 
-**met_data**
+**met_data**/all_met.csv - all met station data joined
+
+**met_data**/Met-2_R1192-Processed.csv - all met data from the second level
+
+**met_data**/Met-8_R1171-Processed.csv - all met data from the third level
+
+**met_data**/rain_df.csv - rain events and associated dates (as points)
+
+**met_data**/rects_drought.csv - drought phases and dates (for geom_rect)
+
+**met_data**/rects_rain.csv - rain events and dates (for geom_rect)
 
 **sap_flow**/lambda_sv_norm.csv - coefficients for the tree wise regression 
 between sap velocity and midday water potential (λG[c,norm]).
 
-**sapflow**/raw_sapflow - all sap flow data files (cleaned files are loose 
-within this folder and labelled "postprocess", and there is a nested folder 
-containing the postprocess files for R1171).
+**sap_flow**/raw_sapflow - all sap flow data files (cleaned files are loose 
+within this folder and labelled "all-postprocess", and there are  nested folders
+containing the individual postprocess files for each tree).
 
-**sapflow**/Sap_Flow_MetaData.xlsx - meta data for all sap flow files.
+**sap_flow**/Sap_Flow_MetaData.xlsx - meta data for all sap flow files.
 
-**sapflow**/sv_all.csv - all cleaned sap flow files, concatenated together and 
+**sap_flow**/sv_all.csv - all cleaned sap flow files, concatenated together and 
 labelled by tree + location. 
+
+**sap_flow**/sv_all.csv - all sap flow data joined (from the all-postprocess 
+files)
 
 **water_potential**/all_wp.csv - all water potential data, cleaned up.
 
@@ -79,4 +97,5 @@ for PD_m and MD_m with sds).
 
 ### figs
 
-some saved figures
+Lots of figures. Things labeled [fig_X] are used in the final poster for this 
+project, everything else are extra figures/figures used along the way.
