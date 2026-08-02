@@ -16,17 +16,17 @@ met_timeseries <- all_met |>
   mutate(Tree_ID = case_when(Tree_ID == "BioR1171" ~ "Level 3",
                              Tree_ID == "BioR1192" ~ "Level 2")) |> 
   ggplot(aes(x = DateTime_MST, y = TA)) +
-  geom_point(aes(color = VPD), size = 1.6) +
+  geom_point(aes(color = VPD), size = 1.7) +
   scale_color_viridis_c(option = "rocket") +
   labs(x = "Date", y = expression(paste("Temperature (", degree, "C)")), 
        color = "VPD") +
   facet_wrap(~ Tree_ID, ncol = 1) +
   theme(panel.grid = element_blank(),
-        axis.text = element_text(size = 27),
-        axis.title = element_text(size = 31),
-        legend.text = element_text(size = 29),
-        legend.title = element_text(size = 31),
-        strip.text = element_text(size = 27, color = "white"),
+        axis.text = element_text(size = 30),
+        axis.title = element_text(size = 34),
+        legend.text = element_text(size = 28),
+        legend.title = element_text(size = 34),
+        strip.text = element_text(size = 30, color = "white"),
         strip.background = element_rect(fill = "#205A3D"))
 
 #### TWD subplot ####
@@ -47,7 +47,7 @@ dendro_timeseries <- all_dendros |>
   geom_point(aes(x = datetime, y = displacement_mm / 3), size = 1.4, color = "gray70") +
   geom_point(aes(color = factor(Tree_ID)), alpha = 0.9, size = 2) +
   scale_color_manual(values = c("#7570b3", "#d95f02", "#1b9e77")) +
-  scale_y_continuous(sec.axis = sec_axis(~ . * 3, expression(paste("Diameter (mm)")))) +
+  scale_y_continuous(sec.axis = sec_axis(~ . * 3, expression(paste("Displacement (", Delta, "d) (mm)")))) +
   facet_wrap(~ Tree_ID, ncol = 1) +
   labs(x = "Date", y = expression(paste(TWD[norm]))) +
   theme(panel.grid = element_blank(),

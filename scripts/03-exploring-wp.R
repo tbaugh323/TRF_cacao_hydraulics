@@ -81,9 +81,9 @@ wp |>
 # just two lines
 wp_sum |> 
   mutate(individual = case_when(individual == 1 ~ "BioR1192",
-                                 individual == 2 ~ "BioR1171",
-                                 individual == 3 ~ "BioR1170",
-                                 individual == 4 ~ "BioR1191")) |> 
+                                individual == 2 ~ "BioR1171",
+                                individual == 3 ~ "BioR1170",
+                                individual == 4 ~ "BioR1191")) |> 
   ggplot() +
   # To add the background colors
   # geom_rect(data = rects_drought |> filter(period == "drought"),
@@ -113,7 +113,7 @@ wp_sum |>
                                                        "BioR1191")), 
                  shape = period), position = position_dodge(width = 70000), 
              size = 5) +
-  facet_wrap(~canopy, ncol = 1) +
+  facet_wrap(~factor(canopy, levels = c("Upper canopy", "Lower canopy")), ncol = 1) +
   scale_color_brewer(palette = "Dark2") +
   labs(x = "Date",
        y = expression(paste(Psi, " (MPa)")),
@@ -174,13 +174,13 @@ hydroscape_canopy <- wp_PDMD |>
 
 hydroscape_coords_u <- data.frame(hydroscape_canopy$PD_m, hydroscape_canopy$MD_m, hydroscape_canopy$canopy) |> 
   filter(hydroscape_canopy.canopy == "Upper canopy") |> dplyr::select(-hydroscape_canopy.canopy)
-hydroscape_poly_u <- Polygon(hydroscape_coords_u, hole = F)
+hydroscape_poly_u <- sp::Polygon(hydroscape_coords_u, hole = F)
 hydroscape_area_u <- hydroscape_poly_u@area
 hydroscape_area_u # Area of upper canopy points
 
 hydroscape_coords_l <- data.frame(hydroscape_canopy$PD_m, hydroscape_canopy$MD_m, hydroscape_canopy$canopy) |> 
   filter(hydroscape_canopy.canopy == "Lower canopy") |> dplyr::select(-hydroscape_canopy.canopy)
-hydroscape_poly_l <- Polygon(hydroscape_coords_l, hole = F)
+hydroscape_poly_l <- sp::Polygon(hydroscape_coords_l, hole = F)
 hydroscape_area_l <- hydroscape_poly_l@area
 hydroscape_area_l # Area of upper canopy points
 
@@ -197,13 +197,13 @@ hydroscape_level <- wp_PDMD |>
 
 hydroscape_coords_2 <- data.frame(hydroscape_level$PD_m, hydroscape_level$MD_m, hydroscape_level$level) |> 
   filter(hydroscape_level.level == 2) |> dplyr::select(-hydroscape_level.level)
-hydroscape_poly_2 <- Polygon(hydroscape_coords_2, hole = F)
+hydroscape_poly_2 <- sp::Polygon(hydroscape_coords_2, hole = F)
 hydroscape_area_2 <- hydroscape_poly_2@area
 hydroscape_area_2 # Area of level 2 points
 
 hydroscape_coords_3 <- data.frame(hydroscape_level$PD_m, hydroscape_level$MD_m, hydroscape_level$level) |> 
   filter(hydroscape_level.level == 3) |> dplyr::select(-hydroscape_level.level)
-hydroscape_poly_3 <- Polygon(hydroscape_coords_3, hole = F)
+hydroscape_poly_3 <- sp::Polygon(hydroscape_coords_3, hole = F)
 hydroscape_area_3 <- hydroscape_poly_3@area
 hydroscape_area_3 # Area of level 3 points
 
@@ -328,3 +328,35 @@ midday_only <- wp_super_sum |>
 
 midday_aov <- aov(wp.m ~ canopy + condition, data = midday_only)
 summary(midday_aov)
+
+
+wp_PDMD_merging <- wp_PDMD_long |> 
+  mutate(location = case_when(Tree_ID == "BioR1192" ~ "Level 2",
+                              Tree_ID == "BioR1171_LB" ~ "Level 3",
+                              Tree_ID == "BioR1171_EB" ~ "Level 3",
+                              Tree_ID == "BioR1170" ~ "Level 3",
+                              Tree_ID == "BioR1191" ~ "Level 3"))
+
+all_met <- read_csv("data/met_data/all_met.csv") |> 
+  mutate(DateTime_MST = as.POSIXct(DateTime_MST, tz = "MST"))
+
+all_met_merging <- all_met |> 
+  rename(dt = DateTime_MST) |> 
+  mutate(location = case_when(Tree_ID == "BioR1192" ~ "Level 2",
+                              Tree_ID == "BioR1171" ~ "Level 3")) |> 
+  dplyr::select(-Tree_ID)
+
+all_met_wp <- merge(all_met_merging, wp_PDMD_merging, by = c("dt", "location"))
+
+all_met_wp |> 
+  ggplot(aes(x = wp_m, y = VPD)) +
+  geom_point(aes(color = Tree_ID, shape = period), size = 3) +
+  theme(panel.grid = element_blank(),
+        axis.text = element_text(size = 15),
+        axis.title = element_text(size = 18),
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 18))
+
+
+
+

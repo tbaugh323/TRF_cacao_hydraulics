@@ -194,11 +194,11 @@ ggplot() +
   labs(x = expression(paste(TWD[min])), y = expression(paste(Psi[PD])), 
        color = "Condition") +
   theme(panel.grid = element_blank(),
-        axis.title = element_text(size = 25),
-        axis.text = element_text(size = 23),
-        legend.title = element_text(size = 25),
-        legend.text = element_text(size = 23),
-        title = element_text(size = 23))
+        axis.title = element_text(size = 29),
+        axis.text = element_text(size = 27),
+        legend.title = element_text(size = 29),
+        legend.text = element_text(size = 27),
+        title = element_text(size = 27))
 
 # Sigmoidal regression (doesn't look super good :( )
 sig_start_values <- c(A = -2, b = 5, c = -0.4)

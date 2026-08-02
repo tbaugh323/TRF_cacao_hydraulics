@@ -98,14 +98,16 @@ sv_wp_fuller |>
            Tree_ID == "BioR1171_LB" |
            Tree_ID == "BioR1192",
          !is.na(period)) |> 
-  filter(Tree_ID != "BioR1192") |> 
+  # filter(Tree_ID != "BioR1192") |> 
   mutate(Tree_ID = case_when(Tree_ID == "BioR1171_EB" ~ "Upper canopy",
-                             Tree_ID == "BioR1171_LB" ~ "Lower canopy")) |> 
+                             Tree_ID == "BioR1171_LB" ~ "Lower canopy",
+                             TRUE ~ Tree_ID)) |> 
   ggplot(aes(y = VhrmHRM5_norm, x = wp_m)) +
   geom_abline(data = sv_wp_lms |> 
-                filter(Tree_ID != "BioR1192") |> 
+                # filter(Tree_ID != "BioR1192") |> 
                 mutate(Tree_ID = case_when(Tree_ID == "BioR1171_EB" ~ "Upper canopy",
-                                           Tree_ID == "BioR1171_LB" ~ "Lower canopy")), 
+                                           Tree_ID == "BioR1171_LB" ~ "Lower canopy",
+                                           TRUE ~ Tree_ID)), 
               aes(slope = lambda_sv, intercept = intercept), color = "orchid3", 
               linewidth = 1) +
   geom_point(aes(color = period, shape = period), size = 6) +
