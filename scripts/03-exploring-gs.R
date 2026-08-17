@@ -113,11 +113,13 @@ clean_all_data |>
 
 # Looking at flow data
 sum_by_canopy |> 
+  filter(period == "morning") |>
   mutate(gsw_var = case_when(gsw_var == "gsw_raw_m" ~ "Raw points",
                              gsw_var == "gsw_rem_m" ~ "Removed negatives",
                              gsw_var == "gsw_zeroed_m" ~ "Zeroed negatives")) |>
   ggplot() +
   geom_hline(aes(yintercept = 0), linewidth = 1, linetype = "dotted", color = "gray50") +
+  geom_line(aes(x = dt, y = flow_m, color = canopy, group = Date), position = position_dodge(width = 5000)) +
   geom_vline(data = rain_df, aes(xintercept = dt), linetype = 2, linewidth = 1, color = "royalblue4") +
   # geom_errorbar(aes(x = dt, y = gsw_m, ymin = gsw_m - gsw_sd, ymax = gsw_m + gsw_sd, color = canopy, shape = canopy), position = position_dodge(width = 5000), width = 10000) +
   geom_point(aes(x = dt, y = flow_m, color = canopy, shape = instrument), position = position_dodge(width = 5000), size = 3) +

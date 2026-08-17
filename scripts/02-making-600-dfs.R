@@ -77,6 +77,8 @@ sum_by_canopy <- clean_all_data |>
             `Fm'_m` = mean(`Fm'`, na.rm = TRUE),
             `Fm'_sd` = sd(`Fm'`, na.rm = TRUE),
             rh_s_m = mean(rh_s, na.rm = TRUE),
+            PhiPS2_m = mean(PhiPS2, na.rm = TRUE),
+            PhiPS2_sd = sd(PhiPS2, na.rm = TRUE),
             rh_r_m = mean(rh_r, na.rm = TRUE),
             Tleaf_m = mean(Tleaf, na.rm = TRUE),
             flow_m = mean(flow, na.rm = TRUE),

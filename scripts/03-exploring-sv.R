@@ -11,6 +11,7 @@ sv_all <- read_csv("data/sap_flow/sv_all.csv") |>
                                  date <= as.Date("2026-07-15") ~ "Drought",
                                date > as.Date("2026-07-15") ~ "Recovery"))
 
+#### Plotting ####
 # All sap velocity all time
 sv_all |> 
   filter(dt >= as.POSIXct("2026-06-23 00:00:00")) |> 
@@ -68,21 +69,38 @@ sv_all |>
 #   labs(color = "Condition") +
 #   facet_wrap(~ Tree_ID)
 
+#### Stats ####
 # Summarizing to daily max/min?
 sv_sum <- sv_all |> 
   group_by(date, condition, Tree_ID) |> 
   summarize(VhrmHRM5_max = max(VhrmHRM5, na.rm = TRUE),
-            VhrmHRM5_min = min(VhrmHRM5, na.rm = TRUE)) |> 
+            VhrmHRM5_min = min(VhrmHRM5, na.rm = TRUE),
+            VhrmHRM5_var = var(VhrmHRM5, na.rm = TRUE)) |> 
   ungroup() |> 
   mutate(VhrmHRM5_amp = VhrmHRM5_max - VhrmHRM5_min)
 
 sv_sum |> 
-  ggplot(aes(x = date, y = VhrmHRM5_amp)) +
+  filter(Tree_ID != "BioR1171_NB", Tree_ID != "BioR1171_M") |> 
+  filter(date >= as.Date("2026-06-20")) |> 
+  ggplot(aes(x = date, y = VhrmHRM5_var)) +
   geom_point(aes(color = factor(condition, levels = c("Predrought", "Drought", "Recovery")))) +
   scale_color_manual(values = c("springgreen4", "lightsalmon3", "yellowgreen")) +
   labs(color = "Condition") +
   facet_wrap(~ Tree_ID)
-# not super informative actually
+
+sv_aov <- aov(VhrmHRM5_var ~ condition, data = sv_sum)
+summary(sv_aov)
+
+sv_sum_2 <- sv_sum |> 
+  mutate(condition = case_when(condition == "Predrought" ~ "wet",
+                               condition == "Drought" ~ "dry",
+                               condition == "Recovery" ~ "wet"))
+
+sv_aov_2 <- aov(VhrmHRM5_var ~ condition, data = sv_sum_2)
+summary(sv_aov_2)
+
+# The three phases, treated separately, are significantly different, but the 
+# wet phases are not significantly different from each other.
 
 # Summarizing more to just drought phases
 sv_super_sum <- sv_sum |> 
@@ -94,6 +112,9 @@ sv_super_sum <- sv_sum |>
   mutate(max_range = max_vel - min_vel)
 View(sv_super_sum)
 
+sv_super_aov <- aov(min_vel ~ condition, data = sv_super_sum)
+summary(sv_super_aov)
 
+# Not significant when summarizing more!
 
 
